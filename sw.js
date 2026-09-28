@@ -1,4 +1,4 @@
-const CACHE = "badklive-shell-v2";
+const CACHE = "badklive-shell-v3";
 const SHELL = [
   "./",
   "./index.html",
@@ -10,7 +10,9 @@ const SHELL = [
   "./icons/icon-512-maskable.png",
   "./icons/apple-touch-icon.png",
   "./icons/favicon-32.png",
-  "./icons/favicon-16.png"
+  "./icons/favicon-16.png",
+  "./icons/game-patron.png",
+  "./icons/game-shahed.png"
 ];
 
 self.addEventListener("install", e => {
