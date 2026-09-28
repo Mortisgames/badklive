@@ -975,7 +975,7 @@ function renderChannelTake(){
     ${catLines.length?`<ul class="ct-conclusions">${catLines.map(l=>`<li>${mdInline(l)}</li>`).join("")}</ul>`:""}
     ${today?`<p class="ct-today"><b>На сьогодні:</b> ${mdInline(today)}</p>`:""}
     ${!hasConclusions?`<p class="ct-full">${mdInline(post.text)}</p>`:""}
-    <p class="ct-foot">Незалежна ручна оцінка власника каналу — першоджерело, окреме від статистичної моделі нижче. <a href="https://t.me/${TG_CHANNEL}" target="_blank" rel="noopener">Відкрити канал у Telegram →</a></p>
+    <p class="ct-foot">Незалежна ручна оцінка автора. <a href="https://t.me/${TG_CHANNEL}" target="_blank" rel="noopener">Відкрити канал у Telegram →</a></p>
   </div>`;
 }
 async function loadFeed(force){
