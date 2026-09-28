@@ -986,7 +986,7 @@ async function loadFeed(force){
   if(fresh && !force) return;
   $("#feedStatus").textContent="Оновлення стрічки…";
   try{
-    const res=await fetch(TG_FEED_URL,{cache:"no-store"});
+    const res=await fetch(TG_FEED_URL,{cache:"no-store",headers:{"X-No-Cache":"true"}});
     if(!res.ok) throw new Error("HTTP "+res.status);
     const md=await res.text();
     const posts=parseTelegramFeed(md);
