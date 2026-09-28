@@ -40,8 +40,6 @@ header.top{background:#070A0E;color:var(--ink);padding:14px 0 0;position:relativ
 .brand h1{font-family:var(--display);font-weight:700;font-size:20px;margin:0;letter-spacing:.03em}
 .brand .sub{opacity:.6;font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em}
 .brand .spacer{flex:1}
-.clsBadge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--high);border:1px solid var(--high);padding:2px 7px;white-space:nowrap}
 .refresh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.03em}
 .refresh button{background:transparent;border:1px solid currentColor;border-radius:2px;padding:4px 10px;cursor:pointer;color:inherit;
   font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:11px}
@@ -65,10 +63,16 @@ nav.tabs button[aria-selected=true]{opacity:1;border-bottom-color:var(--mid);fon
 .cacheNote.on{display:block}
 
 /* night strip */
-.night{display:grid;grid-template-columns:auto 1fr;gap:6px 28px;align-items:end;padding:26px 0 18px;border-bottom:1px solid var(--rule)}
-.night .when{font-family:var(--display);font-size:clamp(28px,5vw,46px);font-weight:700;line-height:1;letter-spacing:-.01em}
-.night .when small{display:block;font-family:var(--mono);text-transform:uppercase;font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:.03em;margin-top:8px}
-.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:12.5px;color:var(--muted);justify-content:flex-end;font-family:var(--mono);text-transform:uppercase;letter-spacing:.02em}
+.night{padding:26px 0 18px;border-bottom:1px solid var(--rule)}
+.night .when{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px;font-family:var(--display);font-size:clamp(28px,5vw,46px);font-weight:700;line-height:1;letter-spacing:-.01em}
+.night .when small{display:block;flex-basis:100%;font-family:var(--mono);text-transform:uppercase;font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:.03em;margin-top:4px}
+.factsBtn{background:transparent;border:1px solid var(--rule);color:var(--muted);font-family:var(--mono);font-size:11px;
+  text-transform:uppercase;letter-spacing:.05em;padding:4px 10px;border-radius:2px;cursor:pointer;align-self:center;line-height:1}
+.factsBtn:hover{color:var(--ink);border-color:var(--focus)}
+.facts-drawer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.facts-drawer.open{grid-template-rows:1fr}
+.facts-drawer>div{overflow:hidden}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:12.5px;color:var(--muted);padding-top:16px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.02em}
 .facts b{color:var(--ink);font-weight:600}
 .badge{display:inline-block;padding:1px 8px;border-radius:2px;font-size:11px;font-weight:700;border:1px solid var(--rule);background:var(--surface);color:var(--ink);
   font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
@@ -97,6 +101,56 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
 .hero-note{font-size:13.5px;color:var(--muted);max-width:48ch;margin:0;flex:1 1 220px}
 @media (max-width:900px){.hero{padding:16px 14px}.hero-city{font-size:20px}}
 
+/* disclaimer */
+.disclaimer{border:1px solid var(--mid);background:rgba(227,166,62,.06);padding:14px 16px;margin:0 0 30px;
+  font-size:13px;line-height:1.55;color:var(--ink);position:relative}
+.disclaimer b{color:var(--mid)}
+.disclaimer::before{content:"⚠";position:absolute;left:-1px;top:-1px;background:var(--mid);color:var(--bg);
+  width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.disclaimer{padding-left:36px}
+
+/* plain-language city summary */
+.plain-city{display:grid;grid-template-columns:150px 110px 1fr;gap:14px;align-items:center;padding:13px 16px;
+  border-top:1px solid var(--soft);cursor:pointer}
+.plain-city:first-child{border-top:0}
+.plain-city:hover{background:var(--soft)}
+.plain-city .pc-name{font-family:var(--mono);font-weight:600;font-size:14.5px;text-transform:uppercase;letter-spacing:.03em}
+.plain-city .pc-level{font-family:var(--mono);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  padding:2px 8px;border:1px solid;display:inline-block;white-space:nowrap}
+.plain-city .pc-note{font-size:13.5px;color:var(--ink);line-height:1.4}
+.plain-city .pc-note small{display:block;color:var(--muted);font-size:12px;margin-top:2px;font-family:var(--mono)}
+.plain-city .pc-extra{grid-column:1/-1;font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:2px}
+.plain-city .pc-extra b{color:var(--ink)}
+.plain-city .pc-comment{display:block;color:var(--mid);font-weight:600;margin-top:4px;font-style:italic}
+@media (max-width:900px){.plain-city{grid-template-columns:1fr;gap:6px}.plain-city .pc-level{justify-self:start}}
+.ops-plain{padding:14px 16px;font-size:13.5px;line-height:1.7}
+.ops-plain ul{margin:6px 0 0;padding-left:20px}
+.ops-plain li{margin:2px 0}
+.ops-plain .none{color:var(--muted);font-family:var(--mono);font-size:12.5px}
+
+/* detail disclosure */
+#detailWrap{margin-top:8px}
+#detailWrap summary{cursor:pointer;list-style:none;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;
+  font-size:12.5px;color:var(--muted);padding:10px 0;border-top:1px dashed var(--rule);-webkit-user-select:none;user-select:none}
+#detailWrap summary::-webkit-details-marker{display:none}
+#detailWrap summary:hover{color:var(--ink)}
+.dtoggle{display:inline-block;transition:transform .2s ease;margin-left:4px}
+details[open] .dtoggle,.factsBtn[aria-expanded="true"] .dtoggle{transform:rotate(180deg)}
+#detailWrap .detailInner{padding-top:6px}
+
+/* channel take (analyst's own nightly assessment, surfaced on Ніч) */
+.channel-take{padding:16px 18px;margin:0 0 30px;border-color:var(--focus)}
+.channel-take .ct-h{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;font-family:var(--mono);
+  text-transform:uppercase;letter-spacing:.04em;font-size:11.5px;color:var(--muted)}
+.channel-take .ct-src{color:var(--focus);font-weight:700}
+.channel-take .ct-short{font-size:15px;font-weight:600;margin:10px 0 0;line-height:1.5}
+.channel-take .ct-conclusions{margin:12px 0 0;padding-left:20px;font-size:13.5px;line-height:1.6;max-width:80ch}
+.channel-take .ct-conclusions li{margin:4px 0}
+.channel-take .ct-today{font-size:13.5px;line-height:1.6;margin:12px 0 0;padding:9px 11px;background:var(--soft);border-left:2px solid var(--mid);max-width:80ch}
+.channel-take .ct-today b{color:var(--mid)}
+.channel-take .ct-full{font-size:13.5px;line-height:1.7;white-space:pre-line;margin:6px 0 0;max-width:80ch}
+.channel-take .ct-foot{font-size:12px;color:var(--muted);margin:12px 0 0;font-family:var(--mono)}
+
 /* feed */
 .feed-post{padding:14px 16px;border-top:1px solid var(--soft)}
 .feed-post:first-child{border-top:0}
@@ -107,7 +161,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
 .seg-btn{background:var(--surface);border:1px solid var(--rule);border-radius:2px;padding:6px 12px;cursor:pointer;
   font-family:var(--mono);text-transform:uppercase;font-size:12px;letter-spacing:.04em;color:inherit}
 .seg-btn:hover{border-color:var(--focus);color:var(--focus)}
-@media (max-width:900px){.grid2{grid-template-columns:1fr}.night{grid-template-columns:1fr}.facts{justify-content:flex-start}}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
 
 /* ladder — the signature element */
 .ladder{padding:6px 0}
@@ -208,8 +262,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
   <div class="wrap">
     <div class="brand">
       <h1>BADK Live</h1>
-      <span class="sub">Режимна балістична модель — живі дані з Google Sheets</span>
-      <span class="clsBadge">Tier-1 · Opsec</span>
+      <span class="sub">Аналітика від Мольфар</span>
       <span class="spacer"></span>
       <span class="refresh"><span class="dot load" id="stDot"></span><span id="stTxt">Завантаження…</span>
         <a href="install.html" class="installLink">Додати на робочий стіл</a>
@@ -237,27 +290,44 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
 
     <section class="view on" id="v-night">
       <div id="hero"></div>
-      <h2>Ймовірність балістичної атаки в цільову ніч</h2>
-      <p class="lead" id="ladderLead">Міста впорядковано за історичною базою (smoothed 50/50, half-life 90 днів). Натисніть на місто, щоб відкрити деталі.</p>
-      <div class="panel">
-        <div class="axis"><span>Місто</span><span style="text-align:right">База</span><span id="axisScale"></span><span class="m">Режим і доказовість</span></div>
-        <div class="ladder" id="ladder"></div>
-        <div class="legend">
-          <span><i style="width:18px;height:8px;background:var(--mid);border-radius:2px"></i>Історична база (StatBase)</span>
-          <span><i style="width:18px;height:2px;background:var(--muted)"></i>95% CI для R365</span>
-          <span><i style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--high)"></i>R56 — останні 8 тижнів</span>
-          <span><i style="width:2px;height:12px;background:var(--ink)"></i>R365</span>
-          <span id="bandNote"></span>
-        </div>
+
+      <div class="disclaimer">
+        <b>Ця оцінка — метод для прийняття рішення, не гарантія безпеки.</b> Приймайте рішення на підставі сухих фактів та власного внутрішнього відчуття.
       </div>
 
-      <h2>Оперативні фактори на ніч</h2>
-      <p class="lead">Ручний шар оцінки з аркуша «Оперативна оцінка». Порожні клітинки показано як «Н/Д» — фактор ще не внесено.</p>
-      <div class="panel scroll" id="opsTbl"></div>
+      <div id="channelTake"></div>
 
-      <h2>Добовий цикл і стан моделі</h2>
-      <div class="panel cycle" id="cycle"></div>
-      <div class="panel scroll" style="margin-top:14px" id="layers"></div>
+      <h2>Коротко по містах</h2>
+      <p class="lead">Простою мовою, без зайвих цифр. Натисніть на місто, щоб відкрити повну історію.</p>
+      <div class="panel" id="plainSummary"></div>
+      <div class="panel scroll" id="opsPlain" style="margin-top:14px"></div>
+
+      <details id="detailWrap">
+        <summary>Детальна аналітика (для фахівців) <span class="dtoggle">▾</span></summary>
+        <div class="detailInner">
+          <h2>Ймовірність балістичної атаки в цільову ніч</h2>
+          <p class="lead" id="ladderLead">Міста впорядковано за історичною базою (smoothed 50/50, half-life 90 днів). Натисніть на місто, щоб відкрити деталі.</p>
+          <div class="panel">
+            <div class="axis"><span>Місто</span><span style="text-align:right">База</span><span id="axisScale"></span><span class="m">Режим і доказовість</span></div>
+            <div class="ladder" id="ladder"></div>
+            <div class="legend">
+              <span><i style="width:18px;height:8px;background:var(--mid);border-radius:2px"></i>Історична база (StatBase)</span>
+              <span><i style="width:18px;height:2px;background:var(--muted)"></i>95% CI для R365</span>
+              <span><i style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:8px solid var(--high)"></i>R56 — останні 8 тижнів</span>
+              <span><i style="width:2px;height:12px;background:var(--ink)"></i>R365</span>
+              <span id="bandNote"></span>
+            </div>
+          </div>
+
+          <h2>Оперативні фактори на ніч</h2>
+          <p class="lead">Ручний шар оцінки з аркуша «Оперативна оцінка». Порожні клітинки показано як «Н/Д» — фактор ще не внесено.</p>
+          <div class="panel scroll" id="opsTbl"></div>
+
+          <h2>Добовий цикл і стан моделі</h2>
+          <div class="panel cycle" id="cycle"></div>
+          <div class="panel scroll" style="margin-top:14px" id="layers"></div>
+        </div>
+      </details>
     </section>
 
     <section class="view" id="v-city">
@@ -392,7 +462,8 @@ function paintFromCache(){
   const c=readCache(); if(!c) return false;
   try{
     applyParsed(c.texts); S.cacheTs=c.ts;
-    renderHead(); renderHero(); renderLadder(); renderOps(); renderCycle();
+    renderHead(); renderHero(); renderPlainSummary(); renderOpsPlain(); renderLadder(); renderOps(); renderCycle();
+    loadFeed(false);
     const cur=document.querySelector("nav.tabs button[aria-selected=true]").dataset.v; if(cur!=="night") showView(cur);
     $("#stDot").className="dot load"; $("#stTxt").textContent="Кешовані дані з "+fmtCacheTime(c.ts)+" · оновлюємо…";
     $("#cacheNote").classList.add("on"); $("#cacheNote").textContent="Показано останній збережений знімок — йде оновлення.";
@@ -484,14 +555,23 @@ function renderHead(){
   const h=S.dash.head; const td=dt(h["Цільова дата"]);
   const phase=h["Фаза"]||"—"; const cap=h.capture||"";
   const pc = /FINAL/.test(phase)?"good": /PREVIEW/.test(phase)?"warn":"";
+  const wasOpen=$("#factsDrawer")&&$("#factsDrawer").classList.contains("open");
   $("#nightHead").innerHTML=`
-    <div class="when">Ніч ${esc(h["Цільова ніч"]||"")}<small>цільова дата після 00:00 — ${esc(fmtD(td))}, ${esc((h["День"]||"").toLowerCase())}</small></div>
-    <div class="facts">
+    <div class="when">Ніч ${esc(h["Цільова ніч"]||"")}
+      <button class="factsBtn" id="factsBtn" type="button" aria-expanded="${wasOpen?"true":"false"}" aria-controls="factsDrawer">Деталі ночі <span class="dtoggle">▾</span></button>
+      <small>цільова дата після 00:00 — ${esc(fmtD(td))}, ${esc((h["День"]||"").toLowerCase())}</small>
+    </div>
+    <div class="facts-drawer${wasOpen?" open":""}" id="factsDrawer"><div><div class="facts">
       <span>Фаза <span class="badge ${pc}">${esc(phase)}</span></span>
       <span>Знімок <span class="badge ${/WAIT/.test(cap)?"warn":""}">${esc(cap||"—")}</span></span>
       <span>Версія моделі <b>${esc(h["Версія"]||"—")}</b></span>
       <span>Аудит закрито по <b>${esc(h["Audit cutoff"]||"—")}</b></span>
-    </div>`;
+    </div></div></div>`;
+  $("#factsBtn").setAttribute("aria-expanded",wasOpen?"true":"false");
+  $("#factsBtn").addEventListener("click",()=>{
+    const open=$("#factsDrawer").classList.toggle("open");
+    $("#factsBtn").setAttribute("aria-expanded",open?"true":"false");
+  });
 }
 
 /* ============ RENDER: hero (at-a-glance summary) ============ */
@@ -507,8 +587,72 @@ function renderHero(){
       <div class="hero-level" style="color:${col};border-color:${col}">${esc(level)}</div>
       <div class="hero-city">${esc(top.city)} <b style="color:${col}">${fmtP(top.base)}</b></div>
     </div>
-    <p class="hero-note">Найвищий орієнтовний показник на ніч ${esc(h["Цільова ніч"]||"")} — по історичній базі (StatBase). Це не прогноз конкретної атаки, а довгостроковий фон ризику. Повний розклад по всіх містах — нижче.</p>
+    <p class="hero-note">Найвищий орієнтовний показник на ніч ${esc(h["Цільова ніч"]||"")} — за історичними даними. Це не прогноз конкретної атаки, а довгостроковий фон ризику. Пояснення нижче.</p>
   </div>`;
+}
+
+/* ============ RENDER: plain-language summary (for non-analysts) ============ */
+function levelWord(v){ return v>=BAND.high?"Підвищений":v>=BAND.mid?"Помірний":"Низький"; }
+function postureNote(v){
+  if(v>=BAND.high) return "Історично підвищений показник для цієї ночі. Варто заздалегідь продумати шлях до укриття й уважніше стежити за офіційними тривогами.";
+  if(v>=BAND.mid) return "Помірний історичний показник. Слідкуйте за офіційними попередженнями трохи уважніше, ніж зазвичай.";
+  return "Історично спокійний показник для цієї ночі й дня тижня. Це не скасовує звичайну обережність.";
+}
+function opsRow(label){ return S.ops&&S.ops.rows.find(r=>r.f===label); }
+function opsVal(label,cityName){
+  const r=opsRow(label); if(!r||!S.ops) return "";
+  const idx=S.ops.cities.indexOf(cityName); if(idx<0) return "";
+  return (r.vals[idx]||"").trim();
+}
+function activityPhrase(v24,v72){
+  const dirWord=v=>v==="Підвищує"?"підвищує ризик":v==="Знижує"?"знижує ризик":v==="Нейтрально"?"нейтральна":v;
+  const parts=[]; if(v24) parts.push("24 год — "+dirWord(v24)); if(v72) parts.push("72 год — "+dirWord(v72));
+  return parts.length? "Активність зафіксована: "+parts.join(", ")+"." : "Активність: не зафіксовано.";
+}
+function renderPlainSummary(){
+  const active=S.dash.cities.filter(c=>c.base!=null).sort((a,b)=>b.base-a.base);
+  if(!active.length){ $("#plainSummary").innerHTML='<p class="note" style="padding:14px">Дані ще завантажуються.</p>'; return; }
+  $("#plainSummary").innerHTML=active.map(c=>{
+    const col=band(c.base);
+    const pu=opsVal("Кількість споряджених ПУ",c.city);
+    const act24=opsVal("Активність 24 години",c.city), act72=opsVal("Активність 72 години",c.city);
+    const comment=opsVal("Коментар / рішення на ніч",c.city);
+    const extra=[];
+    if(pu!=="") extra.push(`Споряджено <b>${esc(pu)}</b> установок, що потенційно можуть бути задіяні по місту.`);
+    extra.push(esc(activityPhrase(act24,act72)));
+    return `<div class="plain-city" data-city="${esc(c.city)}" tabindex="0" role="button" aria-label="${esc(c.city)}: детальніше">
+      <div class="pc-name">${esc(c.city)}</div>
+      <div class="pc-level" style="color:${col};border-color:${col}">${levelWord(c.base)} · ${fmtP(c.base)}</div>
+      <div class="pc-note">${esc(postureNote(c.base))}</div>
+      <div class="pc-extra">${extra.join(" ")}${comment?` <span class="pc-comment">«${esc(comment)}»</span>`:""}</div>
+    </div>`;
+  }).join("");
+  document.querySelectorAll(".plain-city[data-city]").forEach(el=>{
+    const go=()=>{ selCity=el.dataset.city; showView("city"); };
+    el.addEventListener("click",go); el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();go();} });
+  });
+}
+function renderOpsPlain(){
+  const o=S.ops, box=$("#opsPlain");
+  if(!o){ box.innerHTML=""; return; }
+  const manualStart=o.rows.findIndex(r=>/Доставка/.test(r.f));
+  const manual=o.rows.slice(manualStart>=0?manualStart:0).filter(r=>!/Коментар|Робочий/.test(r.f));
+  const activeNames=new Set(S.dash.cities.filter(c=>c.base!=null).map(c=>c.city));
+  const flagged=[];
+  manual.forEach(r=>{
+    const cities=[];
+    r.vals.forEach((v,i)=>{ if(v&&/Підвищує|Є|Зафіксовано/.test(v)) cities.push(o.cities[i]); });
+    if(cities.length){
+      const coversAllActive=[...activeNames].every(n=>cities.includes(n));
+      flagged.push({f:r.f,cities,universal:coversAllActive});
+    }
+  });
+  const line=x=> x.universal
+    ? `${esc(x.f)} — фонова умова по всій географії спостереження`
+    : `${esc(x.f)} — ${x.cities.map(esc).join(", ")}`;
+  box.innerHTML = flagged.length
+    ? `<div class="ops-plain"><b>Додаткові оперативні фактори, що варто врахувати:</b><ul>${flagged.map(x=>`<li>${line(x)}</li>`).join("")}</ul></div>`
+    : `<div class="ops-plain"><b>Додаткові оперативні фактори:</b> <span class="none">на зараз нічого, що явно підвищує ризик, не зафіксовано.</span></div>`;
 }
 
 /* ============ RENDER: ladder ============ */
@@ -797,10 +941,49 @@ function renderFeed(){
   $("#feedList").innerHTML=posts.slice(0,40).map(p=>`<div class="feed-post"><div class="fh">${p.pinned?'<span class="pin">Закріплено</span>':""}<span>${esc(p.date)}</span></div>
     <p>${mdInline(p.text)}</p></div>`).join("");
 }
+function findLatestAnalysis(posts,targetDate){
+  for(const p of posts){
+    if(p.pinned) continue;
+    const m=p.text.match(/^(?:Вечірня|Ранкова|Денна)\s*аналітика,\s*станом на\s*\d{2}:\d{2}\s+(\d{2})\.(\d{2})\.(\d{4})/i);
+    if(!m) continue;
+    const pd=new Date(+m[3],+m[2]-1,+m[1]);
+    if(!targetDate||(pd.getFullYear()===targetDate.getFullYear()&&pd.getMonth()===targetDate.getMonth()&&pd.getDate()===targetDate.getDate())) return {post:p,postDate:pd};
+  }
+  return null;
+}
+function extractConclusions(text){
+  const clean=text.replace(/\\([_*[\]()>#+\-.!])/g,"$1");
+  const short=(clean.match(/Коротко:\s*([^\n]+)/i)||[])[1]||"";
+  const catLines=(clean.match(/^.*\d+(?:[.,]\d+)?%,\s*\d+(?:[.,]\d+)?\/10.*$/gm)||[]).map(l=>l.trim());
+  const todayMatch=clean.match(/Сьогодні:\**\s*\n?([\s\S]*?)(?=\n\s*\n_?Приймайте|\n_?Приймайте|$)/i);
+  const today=todayMatch?todayMatch[1].trim():"";
+  return {short,catLines,today};
+}
+function renderChannelTake(){
+  const box=$("#channelTake"); if(!box) return;
+  const posts=S.feed&&S.feed.posts;
+  if(!posts||!posts.length||!S.dash){ box.innerHTML=""; return; }
+  const td=dt(S.dash.head["Цільова дата"]);
+  if(!td){ box.innerHTML=""; return; }
+  const eve=new Date(td.getFullYear(),td.getMonth(),td.getDate()-1);
+  const found=findLatestAnalysis(posts,eve);
+  if(!found){ box.innerHTML=""; return; }
+  const {post,postDate}=found;
+  const {short,catLines,today}=extractConclusions(post.text);
+  const hasConclusions=short||catLines.length||today;
+  box.innerHTML=`<div class="channel-take panel">
+    <div class="ct-h"><span class="ct-src">Оцінка автора каналу @${TG_CHANNEL}</span><span>${esc(fmtD(postDate))}</span></div>
+    ${short?`<p class="ct-short">${mdInline(short)}</p>`:""}
+    ${catLines.length?`<ul class="ct-conclusions">${catLines.map(l=>`<li>${mdInline(l)}</li>`).join("")}</ul>`:""}
+    ${today?`<p class="ct-today"><b>На сьогодні:</b> ${mdInline(today)}</p>`:""}
+    ${!hasConclusions?`<p class="ct-full">${mdInline(post.text)}</p>`:""}
+    <p class="ct-foot">Незалежна ручна оцінка власника каналу — першоджерело, окреме від статистичної моделі нижче. <a href="https://t.me/${TG_CHANNEL}" target="_blank" rel="noopener">Відкрити канал у Telegram →</a></p>
+  </div>`;
+}
 async function loadFeed(force){
   const cached=(()=>{ try{ return JSON.parse(localStorage.getItem(TG_CACHE_KEY)); }catch(e){ return null; } })();
   if(cached && cached.posts && cached.posts.length && !S.feed) S.feed=cached;
-  if(S.feed) renderFeed();
+  if(S.feed){ renderFeed(); renderChannelTake(); }
   const fresh = S.feed && (Date.now()-S.feed.ts) < TG_STALE_MS;
   if(fresh && !force) return;
   $("#feedStatus").textContent="Оновлення стрічки…";
@@ -812,7 +995,7 @@ async function loadFeed(force){
     if(!posts.length) throw new Error("Не вдалося розпізнати публікації");
     S.feed={ts:Date.now(),posts};
     try{ localStorage.setItem(TG_CACHE_KEY,JSON.stringify(S.feed)); }catch(e){}
-    renderFeed();
+    renderFeed(); renderChannelTake();
     $("#feedStatus").textContent="Оновлено "+new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
   }catch(e){
     console.error(e);
@@ -834,7 +1017,8 @@ async function load(){
   try{
     const keys=Object.keys(GIDS); const texts={}; await Promise.all(keys.map(async k=>{ texts[k]=await getSheetText(GIDS[k]); }));
     applyParsed(texts); saveCache(texts); S.cacheTs=null;
-    renderHead(); renderHero(); renderLadder(); renderOps(); renderCycle();
+    renderHead(); renderHero(); renderPlainSummary(); renderOpsPlain(); renderLadder(); renderOps(); renderCycle();
+    loadFeed(false);
     const cur=document.querySelector("nav.tabs button[aria-selected=true]").dataset.v; if(cur!=="night") showView(cur);
     $("#errBox").innerHTML=""; $("#stDot").className="dot"; $("#cacheNote").classList.remove("on");
     $("#stTxt").textContent="Дані на "+new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"})+" · автооновлення кожні "+AUTO_REFRESH_MIN+" хв";
