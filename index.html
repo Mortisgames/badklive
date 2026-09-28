@@ -42,7 +42,7 @@ header.top{background:#070A0E;color:var(--ink);padding:14px 0 0;position:relativ
 .brand .spacer{flex:1}
 .clsBadge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
   color:var(--high);border:1px solid var(--high);padding:2px 7px;white-space:nowrap}
-.refresh{display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.03em}
+.refresh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.03em}
 .refresh button{background:transparent;border:1px solid currentColor;border-radius:2px;padding:4px 10px;cursor:pointer;color:inherit;
   font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:11px}
 .refresh button:hover{background:rgba(255,255,255,.06)}
@@ -58,7 +58,8 @@ header.top{background:#070A0E;color:var(--ink);padding:14px 0 0;position:relativ
 nav.tabs{display:flex;gap:2px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
 nav.tabs::-webkit-scrollbar{display:none}
 nav.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:9px 14px;cursor:pointer;color:inherit;opacity:.65;white-space:nowrap;
-  font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:12.5px}
+  font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:12.5px;transition:opacity .15s ease,transform .12s ease}
+nav.tabs button:active{transform:scale(.92)}
 nav.tabs button[aria-selected=true]{opacity:1;border-bottom-color:var(--mid);font-weight:600;text-shadow:0 0 10px rgba(227,166,62,.5)}
 .cacheNote{display:none;font-size:12px;padding:6px 0 0;color:var(--mid);font-family:var(--mono)}
 .cacheNote.on{display:block}
@@ -74,7 +75,9 @@ nav.tabs button[aria-selected=true]{opacity:1;border-bottom-color:var(--mid);fon
 .badge.warn{border-color:var(--mid);color:var(--mid)} .badge.good{border-color:var(--ok);color:var(--ok)} .badge.bad{border-color:var(--high);color:var(--high)}
 
 main{padding:22px 0 60px}
-section.view{display:none} section.view.on{display:block}
+section.view{display:none} section.view.on{display:block;animation:viewIn .32s ease}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){section.view.on{animation:none}}
 h2{font-family:var(--display);font-weight:500;font-size:16px;margin:34px 0 4px;text-transform:uppercase;letter-spacing:.04em}
 h2:first-child{margin-top:4px}
 h2::before{content:"// "; color:var(--mid); font-family:var(--mono)}
@@ -84,6 +87,26 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
 .panel::before{top:-1px;left:-1px;border-top:2px solid var(--mid);border-left:2px solid var(--mid)}
 .panel::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--mid);border-right:2px solid var(--mid)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+
+/* hero at-a-glance */
+.hero{padding:22px 20px;margin:6px 0 34px;display:flex;flex-wrap:wrap;gap:16px 30px;align-items:center;border-width:1px}
+.hero-level{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 10px;border:1px solid;display:inline-block;margin-bottom:9px}
+.hero-city{font-family:var(--display);font-size:25px;font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.hero-city b{font-family:var(--mono);margin-left:6px}
+.hero-note{font-size:13.5px;color:var(--muted);max-width:48ch;margin:0;flex:1 1 220px}
+@media (max-width:900px){.hero{padding:16px 14px}.hero-city{font-size:20px}}
+
+/* feed */
+.feed-post{padding:14px 16px;border-top:1px solid var(--soft)}
+.feed-post:first-child{border-top:0}
+.feed-post .fh{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.feed-post .fh .pin{color:var(--mid);border:1px solid var(--mid);padding:0 6px;border-radius:2px;font-size:10px}
+.feed-post p{margin:6px 0 0;font-size:14px;white-space:pre-line;max-width:80ch}
+.feed-post p a{word-break:break-all}
+.seg-btn{background:var(--surface);border:1px solid var(--rule);border-radius:2px;padding:6px 12px;cursor:pointer;
+  font-family:var(--mono);text-transform:uppercase;font-size:12px;letter-spacing:.04em;color:inherit}
+.seg-btn:hover{border-color:var(--focus);color:var(--focus)}
 @media (max-width:900px){.grid2{grid-template-columns:1fr}.night{grid-template-columns:1fr}.facts{justify-content:flex-start}}
 
 /* ladder — the signature element */
@@ -166,7 +189,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
 #boot .log .warn{color:var(--mid)}
 @keyframes logIn{to{opacity:1}}
 #boot .bar{width:min(360px,86vw);height:3px;background:var(--soft);position:relative;overflow:hidden}
-#boot .bar i{position:absolute;inset:0 100% 0 0;background:var(--mid);animation:fillBar 1.9s ease forwards}
+#boot .bar i{position:absolute;inset:0 100% 0 0;background:var(--mid);animation:fillBar 5.7s ease forwards}
 @keyframes fillBar{to{right:0}}
 #boot .skip{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;cursor:pointer}
 </style>
@@ -189,7 +212,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
       <span class="clsBadge">Tier-1 · Opsec</span>
       <span class="spacer"></span>
       <span class="refresh"><span class="dot load" id="stDot"></span><span id="stTxt">Завантаження…</span>
-        <a href="install.html" class="installLink">На екран</a>
+        <a href="install.html" class="installLink">Додати на робочий стіл</a>
         <button id="btnRefresh" type="button">Оновити</button></span>
     </div>
     <div class="tabsWrap" id="tabsWrap">
@@ -200,6 +223,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
         <button role="tab" data-v="reg" aria-selected="false">Реєстр епізодів</button>
         <button role="tab" data-v="waves" aria-selected="false">Глобальні хвилі</button>
         <button role="tab" data-v="model" aria-selected="false">Якість моделі</button>
+        <button role="tab" data-v="feed" aria-selected="false">Стрічка</button>
       </nav>
     </div>
     <div class="cacheNote" id="cacheNote"></div>
@@ -212,6 +236,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
     <div id="errBox"></div>
 
     <section class="view on" id="v-night">
+      <div id="hero"></div>
       <h2>Ймовірність балістичної атаки в цільову ніч</h2>
       <p class="lead" id="ladderLead">Міста впорядковано за історичною базою (smoothed 50/50, half-life 90 днів). Натисніть на місто, щоб відкрити деталі.</p>
       <div class="panel">
@@ -281,6 +306,13 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
       <div class="panel scroll" id="tuneTbl"></div>
       <h2>Методологія</h2>
       <dl class="panel kv" id="methodKv"></dl>
+    </section>
+
+    <section class="view" id="v-feed">
+      <h2>Стрічка каналу @molfar_info</h2>
+      <p class="lead">Останні публікації каналу-джерела, підвантажені через сторонній читач-проксі — формат може змінюватись без попередження. <a href="https://t.me/molfar_info" target="_blank" rel="noopener">Відкрити канал у Telegram →</a></p>
+      <div class="controls"><button id="feedRefresh" type="button" class="seg-btn">Оновити стрічку</button><span class="note" id="feedStatus"></span></div>
+      <div class="panel" id="feedList"></div>
     </section>
   </main>
 </div>
@@ -360,7 +392,7 @@ function paintFromCache(){
   const c=readCache(); if(!c) return false;
   try{
     applyParsed(c.texts); S.cacheTs=c.ts;
-    renderHead(); renderLadder(); renderOps(); renderCycle();
+    renderHead(); renderHero(); renderLadder(); renderOps(); renderCycle();
     const cur=document.querySelector("nav.tabs button[aria-selected=true]").dataset.v; if(cur!=="night") showView(cur);
     $("#stDot").className="dot load"; $("#stTxt").textContent="Кешовані дані з "+fmtCacheTime(c.ts)+" · оновлюємо…";
     $("#cacheNote").classList.add("on"); $("#cacheNote").textContent="Показано останній збережений знімок — йде оновлення.";
@@ -460,6 +492,23 @@ function renderHead(){
       <span>Версія моделі <b>${esc(h["Версія"]||"—")}</b></span>
       <span>Аудит закрито по <b>${esc(h["Audit cutoff"]||"—")}</b></span>
     </div>`;
+}
+
+/* ============ RENDER: hero (at-a-glance summary) ============ */
+function renderHero(){
+  const active=S.dash.cities.filter(c=>c.base!=null).sort((a,b)=>b.base-a.base);
+  if(!active.length){ $("#hero").innerHTML=""; return; }
+  const top=active[0];
+  const level = top.base>=BAND.high? "Підвищена загроза" : top.base>=BAND.mid? "Помірна загроза" : "Низька загроза";
+  const col = band(top.base);
+  const h=S.dash.head;
+  $("#hero").innerHTML=`<div class="hero panel" style="border-color:${col}">
+    <div class="hero-stat">
+      <div class="hero-level" style="color:${col};border-color:${col}">${esc(level)}</div>
+      <div class="hero-city">${esc(top.city)} <b style="color:${col}">${fmtP(top.base)}</b></div>
+    </div>
+    <p class="hero-note">Найвищий орієнтовний показник на ніч ${esc(h["Цільова ніч"]||"")} — по історичній базі (StatBase). Це не прогноз конкретної атаки, а довгостроковий фон ризику. Повний розклад по всіх містах — нижче.</p>
+  </div>`;
 }
 
 /* ============ RENDER: ladder ============ */
@@ -667,6 +716,7 @@ function showView(v){
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
   document.querySelectorAll("section.view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
   if(S.dash){ if(v==="city") renderCity(); if(v==="cal") renderCal(); if(v==="reg") renderReg(); if(v==="waves") renderWaves(); if(v==="model") renderModel(); }
+  if(v==="feed") loadFeed(false);
   hideTip(); tipPinnedEl=null;
   window.scrollTo({top:0});
 }
@@ -707,6 +757,76 @@ document.addEventListener("touchstart",e=>{
   tipPinnedEl=t; placeTip(touch.clientX,touch.clientY,t.getAttribute("data-t"));
 },{passive:true});
 
+/* ============ TELEGRAM FEED (best-effort, via third-party reader proxy) ============ */
+const TG_CHANNEL="molfar_info";
+const TG_FEED_URL="https://r.jina.ai/https://t.me/s/"+TG_CHANNEL;
+const TG_CACHE_KEY="badklive_feed_cache_v1";
+const TG_STALE_MS=10*60*1000;
+
+function parseTelegramFeed(md){
+  const body=(md.split("Markdown Content:")[1]||md);
+  const parts=body.split(/\[_!\[Image \d+\]\([^)]*\)_\]\(https:\/\/t\.me\/[a-zA-Z0-9_]+\)/g);
+  const posts=[];
+  for(let i=1;i<parts.length;i++){
+    let t=parts[i].trim(); if(!t) continue;
+    const dm=t.match(/\n?\s*([A-Z][a-z]+ \d{1,2})\s*$/);
+    const date=dm?dm[1]:"";
+    if(dm) t=t.slice(0,dm.index).trim();
+    const pinMatch=t.match(/pinned\s*«([\s\S]*)»\s*$/);
+    let pinned=false, text=t;
+    if(pinMatch){ pinned=true; text=pinMatch[1].trim(); }
+    else text=text.replace(/^\[\]\(https:\/\/t\.me\/[^)]+\)\s*/,"");
+    text=text.replace(/^_\*\*.+\*\*_.*$/gm,"").trim();
+    text=text.replace(/\n{3,}/g,"\n\n").trim();
+    if(!text) continue;
+    posts.push({date,pinned,text});
+  }
+  return posts.reverse(); // newest first
+}
+function mdInline(raw){
+  const clean=raw.replace(/\\([_*[\]()>#+\-.!])/g,"$1");
+  let s=esc(clean);
+  s=s.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+  s=s.replace(/_([^_\n]+)_/g,"<i>$1</i>");
+  s=s.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  return s;
+}
+function renderFeed(){
+  const posts=S.feed&&S.feed.posts||[];
+  if(!posts.length){ $("#feedList").innerHTML='<p class="note" style="padding:14px">Стрічку ще не завантажено.</p>'; return; }
+  $("#feedList").innerHTML=posts.slice(0,40).map(p=>`<div class="feed-post"><div class="fh">${p.pinned?'<span class="pin">Закріплено</span>':""}<span>${esc(p.date)}</span></div>
+    <p>${mdInline(p.text)}</p></div>`).join("");
+}
+async function loadFeed(force){
+  const cached=(()=>{ try{ return JSON.parse(localStorage.getItem(TG_CACHE_KEY)); }catch(e){ return null; } })();
+  if(cached && cached.posts && cached.posts.length && !S.feed) S.feed=cached;
+  if(S.feed) renderFeed();
+  const fresh = S.feed && (Date.now()-S.feed.ts) < TG_STALE_MS;
+  if(fresh && !force) return;
+  $("#feedStatus").textContent="Оновлення стрічки…";
+  try{
+    const res=await fetch(TG_FEED_URL,{cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const md=await res.text();
+    const posts=parseTelegramFeed(md);
+    if(!posts.length) throw new Error("Не вдалося розпізнати публікації");
+    S.feed={ts:Date.now(),posts};
+    try{ localStorage.setItem(TG_CACHE_KEY,JSON.stringify(S.feed)); }catch(e){}
+    renderFeed();
+    $("#feedStatus").textContent="Оновлено "+new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"});
+  }catch(e){
+    console.error(e);
+    if(S.feed&&S.feed.posts&&S.feed.posts.length){
+      $("#feedStatus").textContent="Не вдалося оновити ("+e.message+") — показано попередній знімок";
+    } else {
+      $("#feedList").innerHTML=`<div class="err">Не вдалося завантажити стрічку каналу (${esc(e.message)}). Проксі-читач — сторонній і не гарантований.
+        <br><a href="https://t.me/${TG_CHANNEL}" target="_blank" rel="noopener">Відкрити @${TG_CHANNEL} напряму в Telegram →</a></div>`;
+      $("#feedStatus").textContent="";
+    }
+  }
+}
+$("#feedRefresh").addEventListener("click",()=>loadFeed(true));
+
 /* ============ LOAD ============ */
 async function load(){
   const hadData=!!S.dash;
@@ -714,7 +834,7 @@ async function load(){
   try{
     const keys=Object.keys(GIDS); const texts={}; await Promise.all(keys.map(async k=>{ texts[k]=await getSheetText(GIDS[k]); }));
     applyParsed(texts); saveCache(texts); S.cacheTs=null;
-    renderHead(); renderLadder(); renderOps(); renderCycle();
+    renderHead(); renderHero(); renderLadder(); renderOps(); renderCycle();
     const cur=document.querySelector("nav.tabs button[aria-selected=true]").dataset.v; if(cur!=="night") showView(cur);
     $("#errBox").innerHTML=""; $("#stDot").className="dot"; $("#cacheNote").classList.remove("on");
     $("#stTxt").textContent="Дані на "+new Date().toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"})+" · автооновлення кожні "+AUTO_REFRESH_MIN+" хв";
@@ -751,10 +871,10 @@ $("#btnRefresh").addEventListener("click",load);
       const d=document.createElement("div");
       d.textContent="> "+t; if(t==="ДОСТУП НАДАНО") d.className="warn";
       log.appendChild(d);
-    }, i*260);
+    }, i*780);
   });
-  setTimeout(()=>{ bootDone=true; maybeHide(); }, LINES.length*260+300);
-  setTimeout(()=>{ dataReady=true; maybeHide(); }, 7000); // hard fallback if network hangs
+  setTimeout(()=>{ bootDone=true; maybeHide(); }, LINES.length*780+900);
+  setTimeout(()=>{ dataReady=true; maybeHide(); }, 16000); // hard fallback if network hangs
   const skip=()=>{ bootDone=true; dataReady=true; hide(); };
   $("#bootSkip").addEventListener("click",skip);
   boot.addEventListener("click",skip);
