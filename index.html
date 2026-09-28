@@ -110,7 +110,7 @@ p.lead{margin:0 0 14px;color:var(--muted);max-width:78ch;font-size:14px}
 .disclaimer{padding-left:36px}
 
 /* plain-language city summary */
-.plain-city{display:grid;grid-template-columns:150px 110px 1fr;gap:14px;align-items:center;padding:13px 16px;
+.plain-city{display:grid;grid-template-columns:150px minmax(150px,max-content) 1fr;gap:14px;align-items:center;padding:13px 16px;
   border-top:1px solid var(--soft);cursor:pointer}
 .plain-city:first-child{border-top:0}
 .plain-city:hover{background:var(--soft)}
@@ -797,7 +797,6 @@ function renderCity(){
     </div>
     <h2>Останні епізоди в реєстрі</h2>
     <div class="panel">${eps.length?eps.map(epHTML).join(""):'<p class="note" style="padding:14px">Епізодів немає.</p>'}</div>`;
-  const calEl=document.querySelector("#cityBody .cal"); if(calEl) calEl.scrollLeft=calEl.scrollWidth;
 }
 function epHTML(r){
   const src=[r.s1,r.s2].filter(Boolean).map(u=>{ let h=u; try{h=new URL(u).hostname.replace("www.","");}catch(e){} return `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(h)}</a>`; }).join(" · ");
@@ -810,7 +809,6 @@ function epHTML(r){
 /* ============ RENDER: calendar tab ============ */
 function renderCal(){
   $("#calAll").innerHTML=calMatrix();
-  $("#calAll").scrollLeft=$("#calAll").scrollWidth;
   const names=S.dash.cities.map(c=>c.city).filter(c=>S.cal[c]);
   const cur=$("#wdCity").value||names[0];
   $("#wdCity").innerHTML=names.map(n=>`<option ${n===cur?"selected":""}>${esc(n)}</option>`).join("");
@@ -1069,7 +1067,9 @@ paintFromCache();
 if(S.dash) window.markDataReady();
 load().then(()=>{ if(!S.cacheTs) window.markDataReady(); }, ()=>window.markDataReady());
 setInterval(load, AUTO_REFRESH_MIN*60*1000);
-if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+const isLocalDev=/^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
+if("serviceWorker" in navigator && !isLocalDev) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator && isLocalDev) navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
 </script>
 </body>
 </html>
