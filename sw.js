@@ -1,8 +1,9 @@
-const CACHE = "badklive-shell-v1";
+const CACHE = "badklive-shell-v2";
 const SHELL = [
   "./",
   "./index.html",
   "./badk-live-dashboard.html",
+  "./install.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
