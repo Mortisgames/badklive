@@ -1,4 +1,4 @@
-/* Експериментальний аналітичний шар — лише для спостереження на staging.
+/* Експериментальний аналітичний шар — окрема вкладка для живого спостереження.
    Рахується на клієнті поверх вже завантажених даних, нічого не записує
    назад у таблицю і не впливає на production-формулу (вона лишається
    у dashboard.js незмінною). Мета: дати живо порівняти, чи рухомий сигнал
@@ -7,8 +7,6 @@
 import { $, esc, num, dt, fmtP, band } from "../utils.js";
 import { BAND } from "../config.js";
 import { S } from "../state.js";
-
-const STAGING = /staging/.test(location.hostname) || location.hostname === "localhost" || location.hostname === "127.0.0.1";
 
 /* Ілюстративні likelihood ratio для ручних індикаторів з аркуша «Оперативна
    оцінка». НЕ каліброві на історії (для цього немає історичного логу значень
@@ -162,7 +160,6 @@ export function renderExperimental(){
 }
 
 export function initExperimental(){
-  if(!STAGING) return;
   if($("#v-exp")) return;
   const nav = $("#subtabsModel");
   if(nav){
@@ -176,7 +173,7 @@ export function initExperimental(){
     const sec = document.createElement("section");
     sec.className = "view"; sec.id = "v-exp";
     sec.innerHTML = `
-      <h2>🧪 Тестова модель аналітики (лише staging)</h2>
+      <h2>🧪 Тестова модель аналітики</h2>
       <p class="lead">Окремий експериментальний прогноз поверх поточної моделі — вкладку «Ніч» він не змінює. Нижче спершу головна цифра на ніч, потім коротко по кожному місту, і насамкінець — пояснення методики для тих, кому цікаво «як саме».</p>
       <div id="expBody"></div>
       <details style="margin-top:14px">

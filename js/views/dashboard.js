@@ -9,9 +9,7 @@ let selCity=null;
 initExperimental();
 
 /* primary header tabs group related views; secondary pill rows switch between
-   views inside a group. "exp" is always listed here but only ever has a
-   button/section when initExperimental() injects them (staging only) — on
-   production it's a dead entry with nothing pointing at it. */
+   views inside a group. */
 const GROUPS={ night:["night"], cities:["city","cal","reg"], model:["model","waves","exp"], feed:["feed","visits"] };
 const lastViewInGroup={ cities:"city", model:"model", feed:"feed" };
 function groupOf(v){ for(const g in GROUPS) if(GROUPS[g].includes(v)) return g; return null; }
