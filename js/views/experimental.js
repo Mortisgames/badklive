@@ -164,10 +164,10 @@ export function renderExperimental(){
 export function initExperimental(){
   if(!STAGING) return;
   if($("#v-exp")) return;
-  const nav = $("#tabsNav");
+  const nav = $("#subtabsModel");
   if(nav){
     const btn = document.createElement("button");
-    btn.type = "button"; btn.setAttribute("role", "tab"); btn.dataset.v = "exp"; btn.setAttribute("aria-selected", "false");
+    btn.type = "button"; btn.dataset.v = "exp"; btn.setAttribute("aria-pressed", "false");
     btn.textContent = "🧪 Тест";
     nav.appendChild(btn);
   }
