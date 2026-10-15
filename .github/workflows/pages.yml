@@ -52,13 +52,9 @@ jobs:
       - run: node scripts/stage.mjs
       - name: Replace published pages with a redirect to the live site
         run: |
-          cat > _site/index.html <<'HTML'
-          <!doctype html>
-          <html lang="uk"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta http-equiv="refresh" content="0;url=https://badklive.up.railway.app/"><title>BADK Live</title>
-          <p>BADK Live переїхав. Якщо не перенаправило автоматично — <a href="https://badklive.up.railway.app/">відкрити новий сайт</a>.</p></html>
-          HTML
-          cp _site/index.html _site/badk-live-dashboard.html
+          cp moved.html _site/index.html
+          cp moved.html _site/badk-live-dashboard.html
+          cp moved.html _site/install.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

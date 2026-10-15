@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BADK Live — новий сайт</title>
+<link rel="canonical" href="https://badklive.up.railway.app/">
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:#0A0E13;color:#DCE6EA;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    text-align:center;padding:24px}
+  .box{max-width:420px}
+  h1{font-size:22px;margin:0 0 10px;letter-spacing:.01em}
+  p{color:#8A97A3;font-size:15px;line-height:1.5;margin:0 0 22px}
+  code{color:#5FD3E8;font-family:ui-monospace,Menlo,Consolas,monospace}
+  a.btn{display:inline-block;background:#E3A63E;color:#0A0E13;text-decoration:none;font-weight:700;
+    padding:12px 26px;border-radius:4px;font-size:15px}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>BADK Live переїхав</h1>
+  <p>Ця адреса більше не оновлюється. Актуальна версія тепер тут:<br><code>badklive.up.railway.app</code></p>
+  <a class="btn" href="https://badklive.up.railway.app/">Перейти на новий сайт</a>
+</div>
+<script>
+(function(){
+  var dest="https://badklive.up.railway.app/";
+  try{
+    if("serviceWorker" in navigator) navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); });
+    if(window.caches) caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); });
+  }catch(e){}
+  location.replace(dest);
+})();
+</script>
+</body>
+</html>
