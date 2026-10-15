@@ -6,6 +6,7 @@ import { saveCache, readCache } from './data/cache.js';
 import { renderDashboard } from './views/dashboard.js';
 import { loadFeed } from './feed.js';
 import { registerWorker } from './pwa.js';
+import { initStats } from './stats.js';
 import './game.js';
 
 const fmtTime=ts=>new Date(ts).toLocaleString('uk-UA');
@@ -76,3 +77,4 @@ if(cached){
 load();
 setInterval(load,AUTO_REFRESH_MIN*60*1000);
 registerWorker();
+initStats();

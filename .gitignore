@@ -3,3 +3,4 @@ playwright-report/
 test-results/
 _site/
 .DS_Store
+.data/

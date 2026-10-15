@@ -1,12 +1,22 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
+import { heartbeat, onlineCount, recordVisit, getStats } from './stats-store.mjs';
 const root = resolve(process.cwd(), '_site');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.csv': 'text/csv; charset=utf-8' };
 const port = process.env.PORT || 3000;
+function json(res, status, body){
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(body));
+}
 createServer(async (req, res) => {
   try {
-    const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+    const url = new URL(req.url, 'http://localhost');
+    if (url.pathname === '/api/ping' && req.method === 'POST') { json(res, 200, { online: heartbeat(url.searchParams.get('id') || 'anon') }); return; }
+    if (url.pathname === '/api/online') { json(res, 200, { online: onlineCount() }); return; }
+    if (url.pathname === '/api/visit' && req.method === 'POST') { await recordVisit(); res.writeHead(204); res.end(); return; }
+    if (url.pathname === '/api/stats') { json(res, 200, await getStats()); return; }
+    const pathname = decodeURIComponent(url.pathname);
     const file = resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
     if (file !== root && !file.startsWith(root + sep)) throw new Error('outside root');
     const body = await readFile(file);
