@@ -11,16 +11,11 @@ export async function registerWorker() {
       controlled = true;
     });
     const reg = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+    let applied = false;
     const offer = () => {
-      if (!reg.waiting || !navigator.serviceWorker.controller || document.querySelector('#appUpdate')) return;
-      const button = document.createElement('button');
-      button.id = 'appUpdate'; button.type = 'button';
-      button.textContent = 'Доступне оновлення — перезавантажити';
-      button.addEventListener('click', () => {
-        button.disabled = true;
-        reg.waiting?.postMessage({ type: 'SKIP_WAITING' });
-      });
-      document.querySelector('header').append(button);
+      if (!reg.waiting || !navigator.serviceWorker.controller || applied) return;
+      applied = true;
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
     };
     const watch = () => {
       const worker = reg.installing;

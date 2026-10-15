@@ -86,15 +86,14 @@ test('legacy data cache is restored even when the first new-version refresh fail
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('badklive_cache_v2')).version)).toBe(2);
 });
 
-test('a new worker waits until the user accepts the update',async({page,context})=>{
+test('a new worker is applied and the page reloads automatically, without asking the user',async({page,context})=>{
   await sources(context);await loaded(page,'/?pwa');
   await page.evaluate(()=>navigator.serviceWorker.ready);
   await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
   // A changed script URL exercises the browser's real update lifecycle, without mutating source files.
-  await page.evaluate(()=>navigator.serviceWorker.register('/sw.js?next-release',{updateViaCache:'none'}));
-  await expect(page.locator('#appUpdate')).toBeVisible();
   const reloaded=page.waitForEvent('load');
-  await page.locator('#appUpdate').click();await reloaded;
+  await page.evaluate(()=>navigator.serviceWorker.register('/sw.js?next-release',{updateViaCache:'none'}));
+  await reloaded;
   await expect(page.locator('#hero')).toContainText('Тестове місто');
 });
 
