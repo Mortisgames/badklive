@@ -79,6 +79,21 @@ function renderChannelTake(){
     <p class="ct-foot">Незалежна ручна оцінка автора. <a href="https://t.me/${TG_CHANNEL}" target="_blank" rel="noopener">Відкрити канал у Telegram →</a></p>
   </div>`;
 }
+async function fetchFeedWithRetry(attempts=3){
+  let lastErr;
+  for(let i=0;i<attempts;i++){
+    try{
+      return await fetchText(TG_FEED_URL,{headers:{"X-No-Cache":"true"}});
+    }catch(e){
+      lastErr=e;
+      if(i<attempts-1){
+        $("#feedStatus").textContent="Проксі не відповів, пробую ще раз… ("+(i+2)+"/"+attempts+")";
+        await new Promise(r=>setTimeout(r,1200));
+      }
+    }
+  }
+  throw lastErr;
+}
 async function updateFeed(force){
   const cached=(()=>{ try{ return JSON.parse(localStorage.getItem(TG_CACHE_KEY)); }catch(e){ return null; } })();
   if(cached && Number.isFinite(cached.ts) && Array.isArray(cached.posts) && cached.posts.every(p=>p&&typeof p.text==="string"&&typeof p.date==="string") && cached.posts.length && !S.feed) S.feed=cached;
@@ -87,7 +102,7 @@ async function updateFeed(force){
   if(fresh && !force) return;
   $("#feedStatus").textContent="Оновлення стрічки…";
   try{
-    const md=await fetchText(TG_FEED_URL,{headers:{"X-No-Cache":"true"}});
+    const md=await fetchFeedWithRetry();
     const posts=parseTelegramFeed(md);
     if(!posts.length) throw new Error("Не вдалося розпізнати публікації");
     S.feed={ts:Date.now(),posts};
