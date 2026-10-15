@@ -5,6 +5,7 @@
    (momentum/national-overlay/LR-комбінація індикаторів) точніший за
    поточну заморожену базу + адитивний ручний шар. */
 import { $, esc, num, dt, fmtP, band } from "../utils.js";
+import { BAND } from "../config.js";
 import { S } from "../state.js";
 
 const STAGING = /staging/.test(location.hostname) || location.hostname === "localhost" || location.hostname === "127.0.0.1";
@@ -95,6 +96,14 @@ function computeExperimental(c, td){
   return { fast, slow, momRatio, momMul, natRatio, natMul, lr, final };
 }
 
+function levelWord(v){ return v >= BAND.high ? "Підвищений" : v >= BAND.mid ? "Помірний" : "Низький"; }
+function levelPhrase(v){ return v >= BAND.high ? "Підвищена загроза" : v >= BAND.mid ? "Помірна загроза" : "Низька загроза"; }
+function deltaWord(delta){
+  if(delta > 0.5) return `тестова модель бачить вищий ризик, ніж прод зараз (+${delta.toFixed(1)} п.п.)`;
+  if(delta < -0.5) return `тестова модель бачить нижчий ризик, ніж прод зараз (${delta.toFixed(1)} п.п.)`;
+  return `тестова модель приблизно згодна з прод-показником (${delta >= 0 ? "+" : ""}${delta.toFixed(1)} п.п.)`;
+}
+
 export function renderExperimental(){
   const box = $("#expBody"); if(!box) return;
   if(!S.dash){ box.innerHTML = ""; return; }
@@ -105,24 +114,51 @@ export function renderExperimental(){
     .filter(x => x.exp);
   if(!rows.length){ box.innerHTML = '<p class="note" style="padding:14px">Немає даних для розрахунку.</p>'; return; }
   rows.sort((a, b) => b.exp.final - a.exp.final);
-  box.innerHTML = `<table class="tbl"><thead><tr>
-    <th>Місто</th><th class="n">База (прод, застигла)</th><th class="n">Прод зараз${rows.some(r=>r.prod.isWork)?" <small>(з ручним шаром)</small>":""}</th><th class="n">Тест (нова, авто)</th><th class="n">Δ п.п.</th><th>Розбивка тестової</th>
-  </tr></thead><tbody>${rows.map(({ c, prod, exp }) => {
+  const top = rows[0];
+  const topCol = band(top.exp.final);
+  const topDelta = (top.exp.final - top.prod.pct) * 100;
+
+  const heroHtml = `<div class="hero panel" style="border-color:${topCol}">
+    <div class="hero-stat">
+      <div class="hero-level" style="color:${topCol};border-color:${topCol}">${esc(levelPhrase(top.exp.final))} — тестовий прогноз</div>
+      <div class="hero-city">${esc(top.c.city)} <b style="color:${topCol}">${fmtP(top.exp.final)}</b></div>
+    </div>
+    <p class="hero-note"><b>Дивіться саме на цю цифру</b> — це підсумковий тестовий прогноз на ніч ${esc(S.dash.head["Цільова ніч"] || "")} для міста з найвищим тестовим показником. ${esc(deltaWord(topDelta))}. Якщо протягом кількох тижнів ця цифра точніше вгадуватиме фактичні атаки, ніж поточний прод-показник (${fmtP(top.prod.pct)}) — підхід варто переносити в production; якщо ні — залишаємо як є.</p>
+  </div>`;
+
+  const citiesHtml = `<div class="panel" style="margin-top:14px">${rows.map(({ c, prod, exp }) => {
+    const col = band(exp.final);
     const delta = (exp.final - prod.pct) * 100;
-    const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(1);
-    const breakdown = `момент ×${exp.momMul.toFixed(2)} (швидкі 60дн ${fmtP(exp.fast)} проти бази ${fmtP(exp.slow)})`
-      + ` · нац.шар ×${exp.natMul.toFixed(2)}`
-      + ` · LR індикаторів ×${exp.lr.toFixed(2)}`;
-    return `<tr>
-      <td>${esc(c.city)}</td>
-      <td class="n">${fmtP(c.base)}</td>
-      <td class="n" style="color:${band(prod.pct)}"><b>${fmtP(prod.pct)}</b></td>
-      <td class="n" style="color:${band(exp.final)}"><b>${fmtP(exp.final)}</b></td>
-      <td class="n">${deltaStr} п.п.</td>
-      <td class="note">${esc(breakdown)}</td>
-    </tr>`;
-  }).join("")}</tbody></table>
-  <p class="note" style="padding:12px">Відсортовано за тестовим показником. Порівнюйте з фактичними атаками самостійно протягом кількох тижнів — цей шар ще не має власного бектесту.</p>`;
+    return `<div class="plain-city">
+      <div class="pc-name">${esc(c.city)}</div>
+      <div class="pc-level" style="color:${col};border-color:${col}">${esc(levelWord(exp.final))} · <b>${fmtP(exp.final)}</b></div>
+      <div class="pc-note">Тестовий прогноз на ніч — це число звіряйте з тим, що станеться фактично. Прод зараз: ${fmtP(prod.pct)}; ${esc(deltaWord(delta))}.</div>
+    </div>`;
+  }).join("")}</div>`;
+
+  const detailHtml = `<details style="margin-top:14px">
+    <summary>Як саме це рахувалось для кожного міста (математика)</summary>
+    <div class="panel scroll" style="margin-top:8px"><table class="tbl"><thead><tr>
+      <th>Місто</th><th class="n">База (прод, застигла)</th><th class="n">Прод зараз</th><th class="n">Тест (підсумок)</th><th class="n">Δ п.п.</th><th>Множники тестової формули</th>
+    </tr></thead><tbody>${rows.map(({ c, prod, exp }) => {
+      const delta = (exp.final - prod.pct) * 100;
+      const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(1);
+      const breakdown = `момент ×${exp.momMul.toFixed(2)} (швидкі 60дн ${fmtP(exp.fast)} проти бази ${fmtP(exp.slow)})`
+        + ` · нац.шар ×${exp.natMul.toFixed(2)}`
+        + ` · LR індикаторів ×${exp.lr.toFixed(2)}`;
+      return `<tr>
+        <td>${esc(c.city)}</td>
+        <td class="n">${fmtP(c.base)}</td>
+        <td class="n" style="color:${band(prod.pct)}"><b>${fmtP(prod.pct)}</b></td>
+        <td class="n" style="color:${band(exp.final)}"><b>${fmtP(exp.final)}</b></td>
+        <td class="n">${deltaStr} п.п.</td>
+        <td class="note">${esc(breakdown)}</td>
+      </tr>`;
+    }).join("")}</tbody></table></div>
+  </details>`;
+
+  box.innerHTML = heroHtml + citiesHtml + detailHtml
+    + `<p class="note" style="padding:12px">Відсортовано за тестовим показником. Тест (підсумок) — єдине число, яке варто відстежувати; решта колонок у таблиці — лише для розуміння, з чого воно складається. Цей шар ще не має власного бектесту, порівнюйте з фактом самостійно протягом кількох тижнів.</p>`;
 }
 
 export function initExperimental(){
@@ -141,12 +177,16 @@ export function initExperimental(){
     sec.className = "view"; sec.id = "v-exp";
     sec.innerHTML = `
       <h2>🧪 Тестова модель аналітики (лише staging)</h2>
-      <div class="disclaimer">
-        <b>Експериментальний шар, не production-модель.</b> Рахується на клієнті поверх вже завантажених даних, нічого не записує в таблицю й не змінює формулу на вкладці «Ніч». Мета — пожити з цим якийсь час і подивитись, чи ближче він до фактичних обстрілів.<br><br>
-        Що реалізовано: 1) момент/дивергенція — швидкий сигнал (half-life 14 дн, вікно 60 дн) проти замороженої бази (half-life 90 дн) по кожному місту; 2) загальнонаціональний шар збудження — той самий розрахунок, агрегований по всій географії спостереження, тобто чи зараз «гаряче» по країні в цілому; 3) ілюстративна баєсівська комбінація ручних оперативних індикаторів через множення правдоподібностей (LR), замість поточного адитивного ±п.п. у проді — ваги LR орієнтовні й <b>не каліброві на історії</b> (бракує логу значень індикаторів за минулі дні), це чесно позначено, не видається за готовий результат.<br><br>
-        Що свідомо не реалізовано: ансамбль з висновком автора каналу @molfar_info — у живій стрічці блок з відсотками по містах найчастіше буквально повторює ці самі числа з BADK («Історична база BADK на ніч…»), тож усереднення моделі з самою собою дало б фальшиве відчуття підтвердження, а не нову інформацію; погода та добір PENDING-днів аудиту — немає потрібних даних на клієнті.
-      </div>
-      <div id="expBody"></div>`;
+      <p class="lead">Окремий експериментальний прогноз поверх поточної моделі — вкладку «Ніч» він не змінює. Нижче спершу головна цифра на ніч, потім коротко по кожному місту, і насамкінець — пояснення методики для тих, кому цікаво «як саме».</p>
+      <div id="expBody"></div>
+      <details style="margin-top:14px">
+        <summary>Що саме тут реалізовано і чому (методика)</summary>
+        <div class="disclaimer" style="margin-top:8px">
+          <b>Експериментальний шар, не production-модель.</b> Рахується на клієнті поверх вже завантажених даних, нічого не записує в таблицю й не змінює формулу на вкладці «Ніч». Мета — пожити з цим якийсь час і подивитись, чи ближче він до фактичних обстрілів.<br><br>
+          Що реалізовано: 1) момент/дивергенція — швидкий сигнал (half-life 14 дн, вікно 60 дн) проти замороженої бази (half-life 90 дн) по кожному місту; 2) загальнонаціональний шар збудження — той самий розрахунок, агрегований по всій географії спостереження, тобто чи зараз «гаряче» по країні в цілому; 3) ілюстративна баєсівська комбінація ручних оперативних індикаторів через множення правдоподібностей (LR), замість поточного адитивного ±п.п. у проді — ваги LR орієнтовні й <b>не каліброві на історії</b> (бракує логу значень індикаторів за минулі дні), це чесно позначено, не видається за готовий результат.<br><br>
+          Що свідомо не реалізовано: ансамбль з висновком автора каналу @molfar_info — у живій стрічці блок з відсотками по містах найчастіше буквально повторює ці самі числа з BADK («Історична база BADK на ніч…»), тож усереднення моделі з самою собою дало б фальшиве відчуття підтвердження, а не нову інформацію; погода та добір PENDING-днів аудиту — немає потрібних даних на клієнті.
+        </div>
+      </details>`;
     main.appendChild(sec);
   }
 }
