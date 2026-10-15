@@ -23,6 +23,7 @@
   <h1>BADK Live переїхав</h1>
   <p>Ця адреса більше не оновлюється. Актуальна версія тепер тут:<br><code>badklive.up.railway.app</code></p>
   <a class="btn" href="https://badklive.up.railway.app/">Перейти на новий сайт</a>
+  <p id="cd" style="margin-top:16px;font-size:13px">Автоматичний перехід через <b id="n">5</b>с…</p>
 </div>
 <script>
 (function(){
@@ -31,7 +32,12 @@
     if("serviceWorker" in navigator) navigator.serviceWorker.getRegistrations().then(function(regs){ regs.forEach(function(r){ r.unregister(); }); });
     if(window.caches) caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); });
   }catch(e){}
-  location.replace(dest);
+  var left=5, n=document.getElementById("n");
+  var t=setInterval(function(){
+    left--;
+    if(n) n.textContent=left;
+    if(left<=0){ clearInterval(t); location.replace(dest); }
+  },1000);
 })();
 </script>
 </body>
