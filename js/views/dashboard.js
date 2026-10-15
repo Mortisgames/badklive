@@ -8,8 +8,8 @@ let selCity=null;
 
 /* primary header tabs group related views; secondary pill rows switch between
    views inside a group. */
-const GROUPS={ night:["night"], cities:["city","cal","reg"], model:["model","waves","visits"], feed:["feed"] };
-const lastViewInGroup={ cities:"city", model:"model" };
+const GROUPS={ night:["night"], cities:["city","cal","reg"], model:["model","waves"], feed:["feed","visits"] };
+const lastViewInGroup={ cities:"city", model:"model", feed:"feed" };
 function groupOf(v){ for(const g in GROUPS) if(GROUPS[g].includes(v)) return g; return null; }
 let curView="night";
 /* ============ RENDER: head ============ */

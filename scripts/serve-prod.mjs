@@ -9,12 +9,19 @@ function json(res, status, body){
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(body));
 }
+// Railway's edge proxy sets X-Forwarded-For; the socket address is only the
+// real client IP for a direct (non-proxied) connection, e.g. local testing.
+function clientIp(req){
+  const xff = req.headers['x-forwarded-for'];
+  if (xff) return xff.split(',')[0].trim();
+  return req.socket.remoteAddress || 'unknown';
+}
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
-    if (url.pathname === '/api/ping' && req.method === 'POST') { json(res, 200, { online: heartbeat(url.searchParams.get('id') || 'anon') }); return; }
+    if (url.pathname === '/api/ping' && req.method === 'POST') { json(res, 200, { online: await heartbeat(clientIp(req)) }); return; }
     if (url.pathname === '/api/online') { json(res, 200, { online: onlineCount() }); return; }
-    if (url.pathname === '/api/visit' && req.method === 'POST') { await recordVisit(); res.writeHead(204); res.end(); return; }
+    if (url.pathname === '/api/visit' && req.method === 'POST') { await recordVisit(clientIp(req)); res.writeHead(204); res.end(); return; }
     if (url.pathname === '/api/stats') { json(res, 200, await getStats()); return; }
     const pathname = decodeURIComponent(url.pathname);
     const file = resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));

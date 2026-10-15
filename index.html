@@ -40,7 +40,7 @@
         <button role="tab" data-group="night" data-v="night" aria-selected="true">Ніч</button>
         <button role="tab" data-group="cities" aria-selected="false">Міста</button>
         <button role="tab" data-group="model" aria-selected="false">Модель</button>
-        <button role="tab" data-group="feed" data-v="feed" aria-selected="false">Стрічка</button>
+        <button role="tab" data-group="feed" aria-selected="false">Стрічка</button>
       </nav>
     </div>
     <div class="cacheNote" id="cacheNote"></div>
@@ -60,6 +60,9 @@
     <nav class="seg subtabs" id="subtabsModel" data-group="model" role="tablist">
       <button data-v="model" aria-pressed="true">Якість</button>
       <button data-v="waves" aria-pressed="false">Хвилі</button>
+    </nav>
+    <nav class="seg subtabs" id="subtabsFeed" data-group="feed" role="tablist">
+      <button data-v="feed" aria-pressed="true">Канал</button>
       <button data-v="visits" aria-pressed="false">Відвідування</button>
     </nav>
 
@@ -155,7 +158,7 @@
 
     <section class="view" id="v-visits">
       <h2>Відвідуваність сайту</h2>
-      <p class="lead">Лічильник завантажень сторінки, рахується на сервері. Production і staging рахуються окремо.</p>
+      <p class="lead">Унікальні відвідувачі за IP-адресою, рахується на сервері. Production і staging рахуються окремо.</p>
       <div id="statsBody"></div>
     </section>
 
