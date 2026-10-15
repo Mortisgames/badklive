@@ -24,7 +24,7 @@ const load=singleFlight(async()=>{
     $('#errBox').textContent=''; $('#stDot').className='dot';
     $('#cacheNote').classList.toggle('on',!saved);
     $('#cacheNote').textContent=saved?'':'Не вдалося зберегти знімок для офлайн-доступу.';
-    $('#stTxt').textContent=`Отримано ${fmtTime(S.receivedAt)} · цільова дата ${S.dash.head['Цільова дата']} · автооновлення кожні ${AUTO_REFRESH_MIN} хв`;
+    $('#stTxt').textContent=`Отримано ${fmtTime(S.receivedAt)}`;
   }catch(e){
     $('#stDot').className='dot err';
     $('#stTxt').textContent=S.receivedAt?`Оновлення не вдалося · останній знімок ${fmtTime(S.receivedAt)}`:'Не вдалося завантажити дані';

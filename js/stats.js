@@ -15,7 +15,7 @@ function visitorId(){
 
 function renderOnline(n){
   const el = $("#onlineCount"); if(!el) return;
-  el.textContent = n == null ? "" : `🟢 Онлайн: ${n}`;
+  el.innerHTML = n == null ? "" : `<i class="dot pulse"></i>Онлайн: <b>${n}</b>`;
 }
 
 async function ping(){
