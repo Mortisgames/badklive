@@ -19,12 +19,18 @@ async function ping(){
     renderOnline(data.online);
   }catch(e){ /* API недоступне (локальний dev, офлайн) */ }
 }
+function leave(){
+  // sendBeacon fires reliably even as the page is being torn down, unlike a
+  // regular fetch which can get cancelled mid-flight on navigation/close.
+  try{ navigator.sendBeacon("/api/leave"); }catch(e){}
+}
 
 export function initStats(){
   fetch("/api/visit", { method: "POST" }).catch(()=>{});
   ping();
-  setInterval(() => { if(document.visibilityState === "visible") ping(); }, 20000);
+  setInterval(() => { if(document.visibilityState === "visible") ping(); }, 5000);
   document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") ping(); });
+  addEventListener("pagehide", leave);
 }
 
 function lastNHourKeys(n){

@@ -12,7 +12,7 @@ import { randomBytes, createHash } from 'node:crypto';
 const STATS_DIR = process.env.STATS_DIR || resolve(process.cwd(), '.data');
 const STATS_FILE = resolve(STATS_DIR, 'stats.json');
 const SALT_FILE = resolve(STATS_DIR, 'salt.txt');
-const ONLINE_WINDOW_MS = 60_000;
+const ONLINE_WINDOW_MS = 15_000;
 const HOURLY_KEEP = 24 * 14;
 const DAILY_KEEP = 180;
 
@@ -79,6 +79,11 @@ export async function heartbeat(ip){
   return online.size;
 }
 export function onlineCount(){
+  pruneOnline();
+  return online.size;
+}
+export async function leave(ip){
+  online.delete(await hashIp(ip));
   pruneOnline();
   return online.size;
 }
