@@ -30,6 +30,8 @@ header.top{background:#070A0E;color:var(--ink);padding:14px 0 0;position:relativ
 .refresh button{background:transparent;border:1px solid currentColor;border-radius:2px;padding:4px 10px;cursor:pointer;color:inherit;
   font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;font-size:11px}
 .refresh button:hover{background:rgba(255,255,255,.06)}
+.online{color:var(--ok)}
+.online:empty{display:none}
 .installLink{color:var(--focus);text-decoration:none;border:1px solid var(--focus);border-radius:2px;padding:4px 9px;font-size:11px;white-space:nowrap}
 .installLink:hover{background:rgba(95,211,232,.08)}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;box-shadow:0 0 6px 1px var(--ok)}
@@ -192,6 +194,11 @@ details[open] .dtoggle,.factsBtn[aria-expanded="true"] .dtoggle{transform:rotate
 .seg button{background:var(--surface);border:0;padding:6px 12px;cursor:pointer;border-left:1px solid var(--rule);font-family:var(--mono);text-transform:uppercase;font-size:12px}
 .seg button:first-child{border-left:0}
 .seg button[aria-pressed=true]{background:var(--mid);color:var(--bg)}
+
+/* secondary tabs — views grouped under a primary header tab */
+.subtabs{display:none;margin:0 0 20px}
+.subtabs.on{display:inline-flex}
+@media (max-width:600px){.subtabs.on{display:flex;width:100%}.subtabs.on button{flex:1}}
 
 /* calendar */
 .strip{padding:14px 16px}

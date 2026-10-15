@@ -3,7 +3,15 @@ import { BAND } from "../config.js";
 import { S } from "../state.js";
 import { loadFeed } from "../feed.js";
 import { calendarDays, wdStats } from "../data/calendar.js";
+import { renderVisitStats } from "../stats.js";
 let selCity=null;
+
+/* primary header tabs group related views; secondary pill rows switch between
+   views inside a group. */
+const GROUPS={ night:["night"], cities:["city","cal","reg"], model:["model","waves","visits"], feed:["feed"] };
+const lastViewInGroup={ cities:"city", model:"model" };
+function groupOf(v){ for(const g in GROUPS) if(GROUPS[g].includes(v)) return g; return null; }
+let curView="night";
 /* ============ RENDER: head ============ */
 function renderHead(){
   const h=S.dash.head; const td=dt(h["Цільова дата"]);
@@ -321,14 +329,26 @@ function renderModel(){
 
 /* ============ VIEW SWITCH ============ */
 function showView(v){
-  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
+  curView=v;
+  const g=groupOf(v); if(g) lastViewInGroup[g]=v;
+  document.querySelectorAll("nav.tabs button[data-group]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.group===g)));
+  document.querySelectorAll(".subtabs").forEach(el=>{
+    const active=el.dataset.group===g;
+    el.classList.toggle("on",active);
+    if(active) el.querySelectorAll("button[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===v)));
+  });
   document.querySelectorAll("section.view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
   if(S.dash){ if(v==="city") renderCity(); if(v==="cal") renderCal(); if(v==="reg") renderReg(); if(v==="waves") renderWaves(); if(v==="model") renderModel(); }
+  if(v==="visits") renderVisitStats();
   if(v==="feed") loadFeed(false);
   hideTip(); tipPinnedEl=null;
   window.scrollTo({top:0});
 }
-document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.v)));
+document.querySelectorAll("nav.tabs button[data-group]").forEach(b=>b.addEventListener("click",()=>{
+  const g=b.dataset.group;
+  showView(b.dataset.v || (GROUPS[g].includes(lastViewInGroup[g])?lastViewInGroup[g]:GROUPS[g][0]));
+}));
+document.querySelectorAll(".subtabs button[data-v]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.v)));
 function syncTabsFade(){ const n=$("#tabsNav"); $("#tabsWrap").classList.toggle("scrollable", n.scrollWidth-n.scrollLeft>n.clientWidth+4); }
 $("#tabsNav").addEventListener("scroll",syncTabsFade); addEventListener("resize",syncTabsFade); syncTabsFade();
 function syncScrollFades(){
@@ -368,6 +388,5 @@ document.addEventListener("touchstart",e=>{
 
 export function renderDashboard(){
   renderHead(); renderHero(); renderPlainSummary(); renderOpsPlain(); renderLadder(); renderOps(); renderCycle();
-  const cur=document.querySelector("nav.tabs button[aria-selected=true]").dataset.v;
-  if(cur!=="night") showView(cur);
+  if(curView!=="night") showView(curView);
 }

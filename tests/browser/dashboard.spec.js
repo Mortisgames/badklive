@@ -17,12 +17,18 @@ async function loaded(page,url='/') {
   await page.locator('#bootSkip').click();
   await expect(page.locator('#boot')).toHaveCount(0);
 }
+const GROUP_OF={night:'night',city:'cities',cal:'cities',reg:'cities',waves:'model',model:'model',feed:'feed'};
+async function openView(page,view){
+  const group=GROUP_OF[view];
+  await page.locator(`nav.tabs button[data-group="${group}"]`).click();
+  if(group==='cities'||group==='model') await page.locator(`.subtabs button[data-v="${view}"]`).click();
+}
 
 test('desktop tabs render without runtime errors and failed update preserves the view',async({page,context})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await sources(context);await loaded(page);
   for(const view of ['city','cal','reg','waves','model','feed','night']){
-    await page.locator(`nav button[data-v="${view}"]`).click();
+    await openView(page,view);
     await expect(page.locator(`#v-${view}`)).toBeVisible();
   }
   const before=await page.locator('#hero').innerHTML();
@@ -41,10 +47,10 @@ test('mobile and empty sections render without NaN or exceptions',async({page,co
   for(const key of ['cal','reg','tactics','waves']) texts[key]=texts[key].split('\r\n')[0];
   await sources(context,texts);await loaded(page);
   for(const view of ['city','cal','reg','waves','model']){
-    await page.locator(`nav button[data-v="${view}"]`).click();
+    await openView(page,view);
     expect(await page.locator(`#v-${view}`).innerHTML()).not.toContain('NaN');
   }
-  await page.locator('nav button[data-v="cal"]').click();
+  await openView(page,'cal');
   await expect(page.locator('#calAll')).toContainText('Немає даних');
   await page.screenshot({path:'test-results/mobile-calendar.png',fullPage:true,animations:'disabled'});
   expect(errors).toEqual([]);
@@ -105,9 +111,9 @@ test('empty dashboard and zero-valued waves remain renderable',async({page,conte
   texts.waves=texts.waves.replace(',50,',',0,');
   await sources(context,texts);await loaded(page);
   await expect(page.locator('#hero')).toContainText('Немає оцінок');
-  await page.locator('nav button[data-v="city"]').click();
+  await openView(page,'city');
   await expect(page.locator('#cityBody')).toContainText('Немає даних міст');
-  await page.locator('nav button[data-v="waves"]').click();
+  await openView(page,'waves');
   expect(await page.locator('#wavesChart').innerHTML()).not.toMatch(/NaN|Infinity/);
   expect(errors).toEqual([]);
 });

@@ -31,18 +31,16 @@
       <span class="sub">Аналітика від Мольфар</span>
       <span class="spacer"></span>
       <span class="refresh"><span class="dot load" id="stDot"></span><span id="stTxt">Завантаження…</span>
+        <span class="online" id="onlineCount"></span>
         <a href="install.html" class="installLink">Додати на робочий стіл</a>
         <button id="btnRefresh" type="button">Оновити</button></span>
     </div>
     <div class="tabsWrap" id="tabsWrap">
       <nav class="tabs" role="tablist" id="tabsNav">
-        <button role="tab" data-v="night" aria-selected="true">Ніч</button>
-        <button role="tab" data-v="city" aria-selected="false">Місто</button>
-        <button role="tab" data-v="cal" aria-selected="false">Календар атак</button>
-        <button role="tab" data-v="reg" aria-selected="false">Реєстр епізодів</button>
-        <button role="tab" data-v="waves" aria-selected="false">Глобальні хвилі</button>
-        <button role="tab" data-v="model" aria-selected="false">Якість моделі</button>
-        <button role="tab" data-v="feed" aria-selected="false">Стрічка</button>
+        <button role="tab" data-group="night" data-v="night" aria-selected="true">Ніч</button>
+        <button role="tab" data-group="cities" aria-selected="false">Міста</button>
+        <button role="tab" data-group="model" aria-selected="false">Модель</button>
+        <button role="tab" data-group="feed" data-v="feed" aria-selected="false">Стрічка</button>
       </nav>
     </div>
     <div class="cacheNote" id="cacheNote"></div>
@@ -53,6 +51,17 @@
   <div class="night" id="nightHead"></div>
   <main>
     <div id="errBox"></div>
+
+    <nav class="seg subtabs" id="subtabsCities" data-group="cities" role="tablist">
+      <button data-v="city" aria-pressed="true">Місто</button>
+      <button data-v="cal" aria-pressed="false">Календар</button>
+      <button data-v="reg" aria-pressed="false">Реєстр</button>
+    </nav>
+    <nav class="seg subtabs" id="subtabsModel" data-group="model" role="tablist">
+      <button data-v="model" aria-pressed="true">Якість</button>
+      <button data-v="waves" aria-pressed="false">Хвилі</button>
+      <button data-v="visits" aria-pressed="false">Відвідування</button>
+    </nav>
 
     <section class="view on" id="v-night">
       <div id="hero"></div>
@@ -142,6 +151,12 @@
       <div class="panel scroll" id="tuneTbl"></div>
       <h2>Методологія</h2>
       <dl class="panel kv" id="methodKv"></dl>
+    </section>
+
+    <section class="view" id="v-visits">
+      <h2>Відвідуваність сайту</h2>
+      <p class="lead">Лічильник завантажень сторінки, рахується на сервері. Production і staging рахуються окремо.</p>
+      <div id="statsBody"></div>
     </section>
 
     <section class="view" id="v-feed">
