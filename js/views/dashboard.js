@@ -28,35 +28,43 @@ function renderHead(){
   });
 }
 
-/* ============ RENDER: hero (at-a-glance summary) ============ */
-function renderHero(){
-  const active=S.dash.cities.filter(c=>c.base!=null).sort((a,b)=>b.base-a.base);
-  if(!active.length){ $("#hero").innerHTML='<p class="note">Немає оцінок для цієї ночі.</p>'; return; }
-  const top=active[0];
-  const level = top.base>=BAND.high? "Підвищена загроза" : top.base>=BAND.mid? "Помірна загроза" : "Низька загроза";
-  const col = band(top.base);
-  const h=S.dash.head;
-  $("#hero").innerHTML=`<div class="hero panel" style="border-color:${col}">
-    <div class="hero-stat">
-      <div class="hero-level" style="color:${col};border-color:${col}">${esc(level)}</div>
-      <div class="hero-city">${esc(top.city)} <b style="color:${col}">${fmtP(top.base)}</b></div>
-    </div>
-    <p class="hero-note">Найвищий орієнтовний показник на ніч ${esc(h["Цільова ніч"]||"")} — за історичними даними. Це не прогноз конкретної атаки, а довгостроковий фон ризику. Пояснення нижче.</p>
-  </div>`;
-}
-
-/* ============ RENDER: plain-language summary (for non-analysts) ============ */
-function levelWord(v){ return v>=BAND.high?"Підвищений":v>=BAND.mid?"Помірний":"Низький"; }
-function postureNote(v){
-  if(v>=BAND.high) return "Історично підвищений показник для цієї ночі. Варто заздалегідь продумати шлях до укриття й уважніше стежити за офіційними тривогами.";
-  if(v>=BAND.mid) return "Помірний історичний показник. Слідкуйте за офіційними попередженнями трохи уважніше, ніж зазвичай.";
-  return "Історично спокійний показник для цієї ночі й дня тижня. Це не скасовує звичайну обережність.";
-}
 function opsRow(label){ return S.ops&&S.ops.rows.find(r=>r.f===label); }
 function opsVal(label,cityName){
   const r=opsRow(label); if(!r||!S.ops) return "";
   const idx=S.ops.cities.indexOf(cityName); if(idx<0) return "";
   return (r.vals[idx]||"").trim();
+}
+function effectivePct(c){
+  const raw=opsVal("Робочий % - після індикаторів",c.city);
+  const work=raw!==""? num(raw) : null;
+  return work!=null? {pct:work,isWork:true} : {pct:c.base,isWork:false};
+}
+
+/* ============ RENDER: hero (at-a-glance summary) ============ */
+function renderHero(){
+  const active=S.dash.cities.filter(c=>c.base!=null).map(c=>({c,eff:effectivePct(c)})).sort((a,b)=>b.eff.pct-a.eff.pct);
+  if(!active.length){ $("#hero").innerHTML='<p class="note">Немає оцінок для цієї ночі.</p>'; return; }
+  const {c:top,eff}=active[0];
+  const level = eff.pct>=BAND.high? "Підвищена загроза" : eff.pct>=BAND.mid? "Помірна загроза" : "Низька загроза";
+  const col = band(eff.pct);
+  const h=S.dash.head;
+  const srcNote = eff.isWork? "фінальний робочий показник на добу (з урахуванням оперативних факторів)" : "за історичними даними (робочий показник ще не внесено)";
+  $("#hero").innerHTML=`<div class="hero panel" style="border-color:${col}">
+    <div class="hero-stat">
+      <div class="hero-level" style="color:${col};border-color:${col}">${esc(level)}</div>
+      <div class="hero-city">${esc(top.city)} <b style="color:${col}">${fmtP(eff.pct)}</b></div>
+    </div>
+    <p class="hero-note">Найвищий орієнтовний показник на ніч ${esc(h["Цільова ніч"]||"")} — ${srcNote}. Це не прогноз конкретної атаки, а довгостроковий фон ризику. Пояснення нижче.</p>
+  </div>`;
+}
+
+/* ============ RENDER: plain-language summary (for non-analysts) ============ */
+function levelWord(v){ return v>=BAND.high?"Підвищений":v>=BAND.mid?"Помірний":"Низький"; }
+function postureNote(v,isWork){
+  const q=isWork?"Поточний":"Історично";
+  if(v>=BAND.high) return `${q} підвищений показник для цієї ночі. Варто заздалегідь продумати шлях до укриття й уважніше стежити за офіційними тривогами.`;
+  if(v>=BAND.mid) return `${q} помірний показник. Слідкуйте за офіційними попередженнями трохи уважніше, ніж зазвичай.`;
+  return `${q} спокійний показник для цієї ночі${isWork?"":" й дня тижня"}. Це не скасовує звичайну обережність.`;
 }
 function activityPhrase(v24,v72){
   const dirWord=v=>v==="Підвищує"?"підвищує ризик":v==="Знижує"?"знижує ризик":v==="Нейтрально"?"нейтральна":v;
@@ -64,20 +72,24 @@ function activityPhrase(v24,v72){
   return parts.length? "Активність зафіксована: "+parts.join(", ")+"." : "Активність: не зафіксовано.";
 }
 function renderPlainSummary(){
-  const active=S.dash.cities.filter(c=>c.base!=null).sort((a,b)=>b.base-a.base);
+  const active=S.dash.cities.filter(c=>c.base!=null).map(c=>({c,eff:effectivePct(c)})).sort((a,b)=>b.eff.pct-a.eff.pct);
   if(!active.length){ $("#plainSummary").innerHTML='<p class="note" style="padding:14px">Немає оцінок для цієї ночі.</p>'; return; }
-  $("#plainSummary").innerHTML=active.map(c=>{
-    const col=band(c.base);
-    const pu=opsVal("Кількість споряджених ПУ",c.city);
+  $("#plainSummary").innerHTML=active.map(({c,eff})=>{
+    const col=band(eff.pct);
+    const puIskander=opsVal("Кількість споряджених ПУ Іскандер-М / KN-23",c.city);
+    const puTsirkon=opsVal("Кількість споряджених ПУ Циркон / Онікс",c.city);
     const act24=opsVal("Активність 24 години",c.city), act72=opsVal("Активність 72 години",c.city);
     const comment=opsVal("Коментар / рішення на ніч",c.city);
     const extra=[];
-    if(pu!=="") extra.push(`Споряджено <b>${esc(pu)}</b> установок, що потенційно можуть бути задіяні по місту.`);
+    const puParts=[];
+    if(puIskander!=="") puParts.push(`${esc(puIskander)} Іскандер-М/KN-23`);
+    if(puTsirkon!=="") puParts.push(`${esc(puTsirkon)} Циркон/Онікс`);
+    if(puParts.length) extra.push(`Споряджено: <b>${puParts.join(", ")}</b> — потенційно можуть бути задіяні по місту.`);
     extra.push(esc(activityPhrase(act24,act72)));
     return `<div class="plain-city" data-city="${esc(c.city)}" tabindex="0" role="button" aria-label="${esc(c.city)}: детальніше">
       <div class="pc-name">${esc(c.city)}</div>
-      <div class="pc-level" style="color:${col};border-color:${col}">${levelWord(c.base)} · ${fmtP(c.base)}</div>
-      <div class="pc-note">${esc(postureNote(c.base))}</div>
+      <div class="pc-level" style="color:${col};border-color:${col}">${levelWord(eff.pct)} · ${fmtP(eff.pct)}</div>
+      <div class="pc-note">${esc(postureNote(eff.pct,eff.isWork))}</div>
       <div class="pc-extra">${extra.join(" ")}${comment?` <span class="pc-comment">«${esc(comment)}»</span>`:""}</div>
     </div>`;
   }).join("");
