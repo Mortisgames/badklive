@@ -30,16 +30,25 @@ function prune(obj, keep){
   if(keys.length > keep) for(const k of keys.slice(0, keys.length - keep)) delete obj[k];
 }
 
-async function ensureSalt(){
-  if(salt) return salt;
-  try{
-    const existing = (await readFile(SALT_FILE, 'utf8')).trim();
-    if(existing){ salt = existing; return salt; }
-  }catch{ /* no salt file yet */ }
-  salt = randomBytes(16).toString('hex');
-  try{ await mkdir(STATS_DIR, { recursive: true }); await writeFile(SALT_FILE, salt); }
-  catch(e){ console.warn('Не вдалося зберегти сіль для хешування IP (рахунок працюватиме лише в пам\'яті цього процесу):', e.message); }
-  return salt;
+let saltPromise = null;
+function ensureSalt(){
+  // Memoize the in-flight promise, not just the resolved value — several
+  // requests can land before the first write finishes, and each would
+  // otherwise generate and persist its own random salt, hashing the same
+  // visitor inconsistently within the same process run.
+  if(salt) return Promise.resolve(salt);
+  if(saltPromise) return saltPromise;
+  saltPromise = (async () => {
+    try{
+      const existing = (await readFile(SALT_FILE, 'utf8')).trim();
+      if(existing){ salt = existing; return salt; }
+    }catch{ /* no salt file yet */ }
+    salt = randomBytes(16).toString('hex');
+    try{ await mkdir(STATS_DIR, { recursive: true }); await writeFile(SALT_FILE, salt); }
+    catch(e){ console.warn('Не вдалося зберегти сіль для хешування IP (рахунок працюватиме лише в пам\'яті цього процесу):', e.message); }
+    return salt;
+  })();
+  return saltPromise;
 }
 async function hashIp(ip){
   const s = await ensureSalt();

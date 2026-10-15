@@ -19,8 +19,11 @@ function clientIp(req){
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
-    if (url.pathname === '/api/ping' && req.method === 'POST') { json(res, 200, { online: await heartbeat(clientIp(req)) }); return; }
-    if (url.pathname === '/api/leave' && req.method === 'POST') { await leave(clientIp(req)); res.writeHead(204); res.end(); return; }
+    // Online presence is keyed by the client's own tab id, not its IP: the
+    // same device can present a different IP across requests (IPv4/IPv6,
+    // mobile networks), which made the live count climb on every refresh.
+    if (url.pathname === '/api/ping' && req.method === 'POST') { json(res, 200, { online: await heartbeat(url.searchParams.get('id') || clientIp(req)) }); return; }
+    if (url.pathname === '/api/leave' && req.method === 'POST') { await leave(url.searchParams.get('id') || clientIp(req)); res.writeHead(204); res.end(); return; }
     if (url.pathname === '/api/online') { json(res, 200, { online: onlineCount() }); return; }
     if (url.pathname === '/api/visit' && req.method === 'POST') { await recordVisit(clientIp(req)); res.writeHead(204); res.end(); return; }
     if (url.pathname === '/api/stats') { json(res, 200, await getStats()); return; }

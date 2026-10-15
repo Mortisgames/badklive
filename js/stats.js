@@ -1,10 +1,22 @@
-/* Відвідуваність і "хто онлайн" — рахується на сервері за IP-адресою
-   (scripts/serve-prod.mjs + scripts/stats-store.mjs), сюди лише fetch.
-   Сервер сам визначає відвідувача з заголовків запиту, клієнту не треба
-   генерувати жоден ідентифікатор. Локальний dev-сервер (scripts/serve.mjs)
-   цих маршрутів не має — будь-яка невдача тут мовчки ігнорується,
-   застосунок працює й без цього. */
+/* Відвідуваність і "хто онлайн" — рахується на сервері
+   (scripts/serve-prod.mjs + scripts/stats-store.mjs). Два різні ключі
+   навмисно: історична погодинна/денна статистика рахує УНІКАЛЬНІ IP (щоб
+   рахувати людей, а не запити); живий "онлайн" натомість рахує за
+   ідентифікатором вкладки (sessionStorage) — саме IP між запитами того
+   самого пристрою може міняти (IPv4/IPv6, мобільні мережі), через що
+   онлайн-лічильник зростав би на кожне оновлення сторінки. Локальний
+   dev-сервер (scripts/serve.mjs) цих маршрутів не має — будь-яка невдача
+   тут мовчки ігнорується, застосунок працює й без цього. */
 import { $, esc } from "./utils.js";
+
+const ID_KEY = "badklive_tab_id";
+function tabId(){
+  try{
+    let id = sessionStorage.getItem(ID_KEY);
+    if(!id){ id = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem(ID_KEY, id); }
+    return id;
+  }catch(e){ return "anon-" + Math.random().toString(36).slice(2); }
+}
 
 function renderOnline(n){
   const el = $("#onlineCount"); if(!el) return;
@@ -13,7 +25,7 @@ function renderOnline(n){
 
 async function ping(){
   try{
-    const res = await fetch("/api/ping", { method: "POST" });
+    const res = await fetch(`/api/ping?id=${encodeURIComponent(tabId())}`, { method: "POST" });
     if(!res.ok) return;
     const data = await res.json();
     renderOnline(data.online);
@@ -22,7 +34,7 @@ async function ping(){
 function leave(){
   // sendBeacon fires reliably even as the page is being torn down, unlike a
   // regular fetch which can get cancelled mid-flight on navigation/close.
-  try{ navigator.sendBeacon("/api/leave"); }catch(e){}
+  try{ navigator.sendBeacon(`/api/leave?id=${encodeURIComponent(tabId())}`); }catch(e){}
 }
 
 export function initStats(){
