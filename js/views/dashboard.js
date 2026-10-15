@@ -4,11 +4,15 @@ import { S } from "../state.js";
 import { loadFeed } from "../feed.js";
 import { calendarDays, wdStats } from "../data/calendar.js";
 import { renderVisitStats } from "../stats.js";
+import { initExperimental, renderExperimental } from "./experimental.js";
 let selCity=null;
+initExperimental();
 
 /* primary header tabs group related views; secondary pill rows switch between
-   views inside a group. */
-const GROUPS={ night:["night"], cities:["city","cal","reg"], model:["model","waves"], feed:["feed","visits"] };
+   views inside a group. "exp" is always listed here but only ever has a
+   button/section when initExperimental() injects them (staging only) — on
+   production it's a dead entry with nothing pointing at it. */
+const GROUPS={ night:["night"], cities:["city","cal","reg"], model:["model","waves","exp"], feed:["feed","visits"] };
 const lastViewInGroup={ cities:"city", model:"model", feed:"feed" };
 function groupOf(v){ for(const g in GROUPS) if(GROUPS[g].includes(v)) return g; return null; }
 let curView="night";
@@ -338,7 +342,7 @@ function showView(v){
     if(active) el.querySelectorAll("button[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===v)));
   });
   document.querySelectorAll("section.view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
-  if(S.dash){ if(v==="city") renderCity(); if(v==="cal") renderCal(); if(v==="reg") renderReg(); if(v==="waves") renderWaves(); if(v==="model") renderModel(); }
+  if(S.dash){ if(v==="city") renderCity(); if(v==="cal") renderCal(); if(v==="reg") renderReg(); if(v==="waves") renderWaves(); if(v==="model") renderModel(); if(v==="exp") renderExperimental(); }
   if(v==="visits") renderVisitStats();
   if(v==="feed") loadFeed(false);
   hideTip(); tipPinnedEl=null;
