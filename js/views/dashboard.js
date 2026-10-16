@@ -265,7 +265,7 @@ function renderCity(){
       <div><h2>Тактика атак</h2><p class="lead">Кількість епізодів за вікном і які засоби в них фіксувалися (один епізод може містити кілька засобів).</p>
         <div class="panel scroll"><table class="tbl"><thead><tr><th>Засіб</th>${tac.map(t=>`<th class="n">${t.win} дн.</th>`).join("")}</tr></thead><tbody>
         <tr><td><b>Епізодів</b></td>${tac.map(t=>`<td class="n"><b>${t.ep??"—"}</b></td>`).join("")}</tr>
-        ${tacRows.map(([l,k,col])=>`<tr><td>${l}</td>${tac.map(t=>`<td class="n"><span style="display:inline-block;height:8px;width:${(t[k]||0)/maxEp*60}px;background:${col};border-radius:2px;margin-right:6px;vertical-align:middle"></span>${t[k]??"—"}</td>`).join("")}</tr>`).join("")}
+        ${tacRows.map(([l,k,col])=>`<tr><td>${l}</td>${tac.map(t=>`<td class="n" style="white-space:nowrap"><span style="display:inline-block;height:8px;width:${(t[k]||0)/maxEp*60}px;background:${col};border-radius:2px;margin-right:6px;vertical-align:middle"></span>${t[k]??"—"}</td>`).join("")}</tr>`).join("")}
         <tr><td>Комбіновані</td>${tac.map(t=>`<td class="n">${t.comb??"—"} (${fmtP(t.share,0)})</td>`).join("")}</tr>
         <tr><td>Статус історії</td>${tac.map(t=>`<td class="n"><span class="badge ${t.status==="READY"?"good":"warn"}">${esc(t.status)}</span></td>`).join("")}</tr>
         </tbody></table></div></div>
