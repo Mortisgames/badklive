@@ -1,65 +1,81 @@
 // Паралельна дослідницька база — не частина офіційної моделі й нічого в неї
-// не пише. Два типи записів в одному append-only журналі:
-//   "ops-snapshot" — точковий знімок ручних індикаторів ("Оперативна оцінка")
-//     і базових % по містах у момент, коли вони змінились. Офіційна таблиця
-//     перезаписується в місці, тож без цього історія того, що саме було
-//     заповнено на момент конкретної ночі, губиться назавжди.
-//   "event"        — конкретна атака/епізод з часом, знайдений через пошук
-//     або повідомлений користувачем, з рівнем підтвердження (A/B/C, як і в
+// не пише. Postgres (окремий сервіс на Railway, DATABASE_URL), бо на
+// відміну від лічильників відвідуваності (stats-store.mjs) це дані, які
+// з часом потребують реальних запитів (по місту, даті, рівню
+// підтвердження), а не просто ключ→число.
+//
+// Два типи записів у одній таблиці research_entries (type-дискримінатор):
+//   "ops-snapshot" — точковий знімок ручних індикаторів ("Оперативна
+//     оцінка") і базових % по містах у момент, коли вони змінились.
+//     Офіційна таблиця перезаписується в місці, тож без цього історія
+//     того, що саме було заповнено на момент конкретної ночі, губиться
+//     назавжди.
+//   "event" — конкретна атака/епізод з часом, знайдений через пошук або
+//     повідомлений користувачем, з рівнем підтвердження (A/B/C, як і в
 //     офіційному реєстрі) та приміткою про джерело.
-// Персистентно на тому ж STATS_DIR (Railway Volume), що й stats-store.mjs.
-import { readFile, writeFile, mkdir, appendFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import pg from 'pg';
 
-const DIR = process.env.STATS_DIR || resolve(process.cwd(), '.data');
-const LOG_FILE = resolve(DIR, 'research-log.jsonl');
-const MAX_ENTRY_BYTES = 20000;
+const { Pool } = pg;
+let pool = null;
+let schemaReady = null;
 
-let lastOpsSig = null;
-let loaded = false;
-let writing = Promise.resolve();
+function getPool(){
+  if(!process.env.DATABASE_URL) return null;
+  if(!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  return pool;
+}
+
+function ensureSchema(){
+  const p = getPool();
+  if(!p) return Promise.resolve(false);
+  if(!schemaReady){
+    schemaReady = p.query(`
+      CREATE TABLE IF NOT EXISTS research_entries (
+        id BIGSERIAL PRIMARY KEY,
+        ts TIMESTAMPTZ NOT NULL DEFAULT now(),
+        type TEXT NOT NULL,
+        ops_signature TEXT,
+        data JSONB NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS research_entries_type_ts_idx ON research_entries (type, ts DESC);
+      CREATE INDEX IF NOT EXISTS research_entries_ops_sig_idx ON research_entries (type, ops_signature);
+    `).then(() => true);
+  }
+  return schemaReady;
+}
 
 function opsSignature(entry){
   return JSON.stringify([entry.targetDate, entry.ops, entry.cities]);
 }
 
-async function ensureLoaded(){
-  if(loaded) return;
-  loaded = true;
-  try{
-    const raw = await readFile(LOG_FILE, 'utf8');
-    const lines = raw.trim().split('\n').filter(Boolean);
-    for(let i = lines.length - 1; i >= 0; i--){
-      const e = JSON.parse(lines[i]);
-      if(e.type === 'ops-snapshot'){ lastOpsSig = opsSignature(e); break; }
-    }
-  }catch{ /* no log yet */ }
-}
-
 export async function recordEntry(entry){
   if(!entry || typeof entry !== 'object' || !entry.type) throw new Error('invalid entry');
   const json = JSON.stringify(entry);
-  if(json.length > MAX_ENTRY_BYTES) throw new Error('entry too large');
-  await ensureLoaded();
+  if(json.length > 20000) throw new Error('entry too large');
+  const p = getPool();
+  if(!p) throw new Error('DATABASE_URL not configured');
+  await ensureSchema();
+
   if(entry.type === 'ops-snapshot'){
-    const s = opsSignature(entry);
-    if(s === lastOpsSig) return { stored: false, reason: 'unchanged' };
-    lastOpsSig = s;
+    const sig = opsSignature(entry);
+    const { rows } = await p.query(
+      `SELECT ops_signature FROM research_entries WHERE type = 'ops-snapshot' ORDER BY ts DESC LIMIT 1`
+    );
+    if(rows[0]?.ops_signature === sig) return { stored: false, reason: 'unchanged' };
+    await p.query(`INSERT INTO research_entries (type, ops_signature, data) VALUES ($1, $2, $3)`, [entry.type, sig, entry]);
+    return { stored: true };
   }
-  const line = JSON.stringify({ ts: Date.now(), ...entry }) + '\n';
-  writing = writing.then(async () => {
-    try{ await mkdir(DIR, { recursive: true }); await appendFile(LOG_FILE, line); }
-    catch(e){ console.warn('Не вдалося дописати дослідницький журнал:', e.message); }
-  });
-  await writing;
+
+  await p.query(`INSERT INTO research_entries (type, data) VALUES ($1, $2)`, [entry.type, entry]);
   return { stored: true };
 }
 
 export async function readEntries({ limit = 500, type } = {}){
-  try{
-    const raw = await readFile(LOG_FILE, 'utf8');
-    let lines = raw.trim().split('\n').filter(Boolean).map(l => JSON.parse(l));
-    if(type) lines = lines.filter(e => e.type === type);
-    return lines.slice(-limit);
-  }catch{ return []; }
+  const p = getPool();
+  if(!p) return [];
+  await ensureSchema();
+  const { rows } = type
+    ? await p.query(`SELECT ts, data FROM research_entries WHERE type = $1 ORDER BY ts ASC LIMIT $2`, [type, limit])
+    : await p.query(`SELECT ts, data FROM research_entries ORDER BY ts ASC LIMIT $1`, [limit]);
+  return rows.map(r => ({ ts: +r.ts, ...r.data }));
 }
