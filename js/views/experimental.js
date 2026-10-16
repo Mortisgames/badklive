@@ -94,6 +94,76 @@ function computeExperimental(c, td){
   return { fast, slow, momRatio, momMul, natRatio, natMul, lr, final };
 }
 
+/* Незалежна база — та сама half-life-90 same-weekday⊕all-day формула, що й
+   офіційна «Історична база», але рахована з ВЛАСНОГО календаря в Postgres
+   (одноразовий імпорт офіційної історії + надалі — підтверджені (A/B)
+   події з погодинного дослідницького журналу), а не з поточного стану
+   Google-таблиці. Мета — звести залежність від таблиці до мінімуму (лишає
+   лише ручні індикатори, яких більше ніде взяти) і водночас перевіряти
+   офіційну базу незалежним джерелом. */
+let independentCalendar = null;
+let independentCalendarPromise = null;
+function localDateFromISO(iso){
+  const [y, mo, d] = iso.split("-").map(Number);
+  return new Date(y, mo - 1, d);
+}
+function loadIndependentCalendar(){
+  if(independentCalendar) return Promise.resolve(independentCalendar);
+  if(independentCalendarPromise) return independentCalendarPromise;
+  independentCalendarPromise = fetch("/api/calendar")
+    .then(r => r.ok ? r.json() : {})
+    .then(raw => {
+      const parsed = {};
+      for(const city in raw) parsed[city] = raw[city].map(o => ({ d: localDateFromISO(o.d), cov: o.cov, a: o.a, n: o.n })).sort((a, b) => a.d - b.d);
+      independentCalendar = parsed;
+      return parsed;
+    })
+    .catch(() => ({}));
+  return independentCalendarPromise;
+}
+function sameWeekdayDecayRate(days, targetDate, halfLifeDays, windowDays){
+  if(!days) return null;
+  const wd = targetDate.getDay();
+  return decayRate(days.filter(o => o.d.getDay() === wd), targetDate, halfLifeDays, windowDays);
+}
+function independentBaseFor(days, td){
+  if(!days || !days.length) return null;
+  const sameWd = sameWeekdayDecayRate(days, td, 90, 365);
+  const allDay = decayRate(days, td, 90, 365);
+  if(sameWd == null && allDay == null) return null;
+  if(sameWd == null) return allDay;
+  if(allDay == null) return sameWd;
+  return 0.5 * sameWd + 0.5 * allDay;
+}
+
+async function renderIndependentSection(td){
+  const box = $("#expIndependentBody"); if(!box) return;
+  const cal = await loadIndependentCalendar();
+  if(!cal || !Object.keys(cal).length){
+    box.innerHTML = '<p class="note" style="padding:14px">Власна база ще порожня або недоступна (можливо, PostgreSQL ще не наповнено).</p>';
+    return;
+  }
+  const rows = S.dash.cities.filter(c => c.base != null).map(c => ({
+    c, independent: independentBaseFor(cal[c.city], td), n: cal[c.city] ? cal[c.city].length : 0,
+  })).filter(x => x.independent != null);
+  if(!rows.length){ box.innerHTML = '<p class="note" style="padding:14px">Недостатньо даних у власному календарі для розрахунку.</p>'; return; }
+  rows.sort((a, b) => b.independent - a.independent);
+  box.innerHTML = `<table class="tbl"><thead><tr>
+    <th>Місто</th><th class="n">Офіційна база (прод)</th><th class="n">Незалежна база (власна історія)</th><th class="n">Δ п.п.</th><th class="n">Днів у власному календарі</th>
+  </tr></thead><tbody>${rows.map(({ c, independent, n }) => {
+    const delta = (independent - c.base) * 100;
+    const deltaStr = (delta >= 0 ? "+" : "") + delta.toFixed(1);
+    return `<tr>
+      <td>${esc(c.city)}</td>
+      <td class="n">${fmtP(c.base)}</td>
+      <td class="n" style="color:${band(independent)}"><b>${fmtP(independent)}</b></td>
+      <td class="n">${deltaStr} п.п.</td>
+      <td class="n">${n}</td>
+    </tr>`;
+  }).join("")}</tbody></table>
+  <p class="note" style="padding:12px">Та сама формула, що й офіційна «Історична база» (50% той самий день тижня + 50% усі дні, half-life 90), але джерело — власний календар у Postgres: одноразовий імпорт офіційної історії плюс підтверджені (A/B) події з погодинного пошуку, не поточний стан Google-таблиці. Великі розбіжності — сигнал або що власний календар ще неповний, або що офіційна таблиця не встигає за реальністю.</p>`;
+}
+
 function levelWord(v){ return v >= BAND.high ? "Підвищений" : v >= BAND.mid ? "Помірний" : "Низький"; }
 function levelPhrase(v){ return v >= BAND.high ? "Підвищена загроза" : v >= BAND.mid ? "Помірна загроза" : "Низька загроза"; }
 function deltaWord(delta){
@@ -157,6 +227,8 @@ export function renderExperimental(){
 
   box.innerHTML = heroHtml + citiesHtml + detailHtml
     + `<p class="note" style="padding:12px">Відсортовано за тестовим показником. Тест (підсумок) — єдине число, яке варто відстежувати; решта колонок у таблиці — лише для розуміння, з чого воно складається. Цей шар ще не має власного бектесту, порівнюйте з фактом самостійно протягом кількох тижнів.</p>`;
+
+  renderIndependentSection(td);
 }
 
 export function initExperimental(){
@@ -176,6 +248,11 @@ export function initExperimental(){
       <h2>🧪 Тестова модель аналітики</h2>
       <p class="lead">Окремий експериментальний прогноз поверх поточної моделі — вкладку «Ніч» він не змінює. Нижче спершу головна цифра на ніч, потім коротко по кожному місту, і насамкінець — пояснення методики для тих, кому цікаво «як саме».</p>
       <div id="expBody"></div>
+
+      <h2>Незалежна база — з власної історії, не з таблиці</h2>
+      <p class="lead">Розрахунок тією ж формулою, що й офіційна «Історична база», але з даних у власній Postgres-базі: одноразовий імпорт офіційної історії + надалі підтверджені (A/B) події з погодинного дослідницького журналу. Мета — поступово зменшити залежність від Google-таблиці, лишивши там тільки ручні індикатори, яких більше ніде взяти.</p>
+      <div class="panel scroll" id="expIndependentBody"><p class="note" style="padding:14px">Завантаження власної бази…</p></div>
+
       <details style="margin-top:14px">
         <summary>Що саме тут реалізовано і чому (методика)</summary>
         <div class="disclaimer" style="margin-top:8px">

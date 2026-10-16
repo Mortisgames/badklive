@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 import { heartbeat, onlineCount, recordVisit, getStats, leave } from './stats-store.mjs';
 import { recordEntry, readEntries } from './research-store.mjs';
+import { getCalendar } from './calendar-store.mjs';
 const root = resolve(process.cwd(), '_site');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.csv': 'text/csv; charset=utf-8' };
 const port = process.env.PORT || 3000;
@@ -48,6 +49,7 @@ createServer(async (req, res) => {
     if (url.pathname === '/api/research' && req.method === 'GET') {
       json(res, 200, await readEntries({ type: url.searchParams.get('type') || undefined })); return;
     }
+    if (url.pathname === '/api/calendar') { json(res, 200, await getCalendar()); return; }
     const pathname = decodeURIComponent(url.pathname);
     const file = resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
     if (file !== root && !file.startsWith(root + sep)) throw new Error('outside root');
