@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 import { heartbeat, onlineCount, recordVisit, getStats, leave } from './stats-store.mjs';
+import { recordEntry, readEntries } from './research-store.mjs';
 const root = resolve(process.cwd(), '_site');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.csv': 'text/csv; charset=utf-8' };
 const port = process.env.PORT || 3000;
@@ -16,6 +17,18 @@ function clientIp(req){
   if (xff) return xff.split(',')[0].trim();
   return req.socket.remoteAddress || 'unknown';
 }
+function readBody(req, limit = 40000){
+  return new Promise((resolvePromise, reject) => {
+    let data = '', size = 0;
+    req.on('data', chunk => {
+      size += chunk.length;
+      if (size > limit) { reject(new Error('payload too large')); req.destroy(); return; }
+      data += chunk;
+    });
+    req.on('end', () => resolvePromise(data));
+    req.on('error', reject);
+  });
+}
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
@@ -27,6 +40,14 @@ createServer(async (req, res) => {
     if (url.pathname === '/api/online') { json(res, 200, { online: onlineCount() }); return; }
     if (url.pathname === '/api/visit' && req.method === 'POST') { await recordVisit(clientIp(req)); res.writeHead(204); res.end(); return; }
     if (url.pathname === '/api/stats') { json(res, 200, await getStats()); return; }
+    if (url.pathname === '/api/research' && req.method === 'POST') {
+      try{ const entry = JSON.parse((await readBody(req)) || '{}'); json(res, 200, await recordEntry(entry)); }
+      catch(e){ json(res, 400, { error: e.message }); }
+      return;
+    }
+    if (url.pathname === '/api/research' && req.method === 'GET') {
+      json(res, 200, await readEntries({ type: url.searchParams.get('type') || undefined })); return;
+    }
     const pathname = decodeURIComponent(url.pathname);
     const file = resolve(root, '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
     if (file !== root && !file.startsWith(root + sep)) throw new Error('outside root');

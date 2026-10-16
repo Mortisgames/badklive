@@ -7,6 +7,7 @@ import { renderDashboard } from './views/dashboard.js';
 import { loadFeed } from './feed.js';
 import { registerWorker } from './pwa.js';
 import { initStats } from './stats.js';
+import { recordOpsSnapshot } from './research.js';
 import './game.js';
 
 const fmtTime=ts=>new Date(ts).toLocaleString('uk-UA');
@@ -21,6 +22,7 @@ const load=singleFlight(async()=>{
     commitSnapshot(result.snapshot,result.receivedAt);
     const saved=saveCache(result);
     paint();
+    recordOpsSnapshot();
     $('#errBox').textContent=''; $('#stDot').className='dot';
     $('#cacheNote').classList.toggle('on',!saved);
     $('#cacheNote').textContent=saved?'':'Не вдалося зберегти знімок для офлайн-доступу.';
