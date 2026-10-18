@@ -1,4 +1,4 @@
-import { columnIndex, matchesColumn } from './columns.js';
+import { columnIndex, exactIndex, matchesColumn } from './columns.js';
 import { cell, dt, num } from '../utils.js';
 
 export const CONTRACTS = {
@@ -27,11 +27,11 @@ export function validateSheet(sheet,rows){
   const H=rows[hi].map(v=>v.trim());
   const ix=name=>columnIndex(H,name);
   for(const name of CONTRACTS[sheet]){
-    if((sheet==='dash'?H.indexOf(name):ix(name))<0) fail(sheet,hi+1,name,'обов’язковий стовпець відсутній');
+    if((sheet==='dash'?exactIndex(H,name):ix(name))<0) fail(sheet,hi+1,name,'обов’язковий стовпець відсутній');
     if(H.filter(h=>matchesColumn(h,name)).length>1) fail(sheet,hi+1,name,'неоднозначний заголовок');
   }
   const check=(r,i,name,type,required=false)=>{
-    const raw=cell(r,ix(name));
+    const raw=cell(r,(sheet==='dash'?exactIndex(H,name):ix(name)));
     if(missing(raw)){if(required) fail(sheet,i+1,name,'значення відсутнє'); return;}
     if(type==='date'){if(!dt(raw)) fail(sheet,i+1,name,'некоректна дата'); return;}
     const v=num(raw);
