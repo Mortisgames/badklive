@@ -1,4 +1,4 @@
-import { columnIndex } from "./columns.js";
+import { columnIndex, exactIndex } from "./columns.js";
 import {num,dt,findRow,cell} from "../utils.js";
 export function parseDash(R){
   const d={cities:[],cycle:[],layers:[],notes:[],head:{}};
@@ -7,7 +7,7 @@ export function parseDash(R){
   d.head.capture = h.filter(Boolean).slice(-1)[0] || "";
   const hi=findRow(R,r=>cell(r,0)==="Місто"&&cell(r,1)==="R56");
   if(hi>=0){
-    const H=R[hi].map(x=>x.trim()); const ix=n=>H.indexOf(n);
+    const H=R[hi].map(x=>x.trim()); const ix=n=>exactIndex(H,n);
     for(let i=hi+1;i<R.length;i++){
       const r=R[i]; const c=cell(r,0); if(!c||["Метод","Режим"].includes(c)) break;
       d.cities.push({ city:c, r56:num(r[ix("R56")]), r90:num(r[ix("R90")]), r180:num(r[ix("R180")]), r365:num(r[ix("R365")]),
